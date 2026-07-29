@@ -1,0 +1,1 @@
+export { default as Cotizaciones_dashboard } from './cotizaciones_dashboard';
