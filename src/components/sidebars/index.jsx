@@ -4,4 +4,5 @@ export { default as Almacen_sidebar } from './almacen_sidebar';
 export { default as MantenimientoSidebar } from './mantenimiento_sidebar';
 export { default as Calidad_sidebar } from './calidad_sidebar';
 export { default as Ventas_sidebar } from './ventas_sidebar';
+export { default as Compras_sidebar } from './compras_sidebar';
 

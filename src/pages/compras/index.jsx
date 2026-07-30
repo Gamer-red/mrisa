@@ -1,0 +1,1 @@
+export { default as ComprasDashboard } from './compras_dashboard';

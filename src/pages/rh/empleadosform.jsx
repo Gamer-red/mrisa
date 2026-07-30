@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
+import { useAuth } from '../../context/authcontext';
+import { empleadosService } from '../../services/empleadosService';
 
 function EmpleadoForm({ onClose, onSubmit }) {
   const [formData, setFormData] = useState({
     // Información Personal
     nombre: '',
-    apellidoPaterno: '',
-    apellidoMaterno: '',
-    fechaNacimiento: '',
+    apellido_paterno: '',
+    apellido_materno: '',
+    fecha_nacimiento: '',
     telefono: '',
     correo: '',
     curp: '',
@@ -17,7 +19,7 @@ function EmpleadoForm({ onClose, onSubmit }) {
     calle: '',
     numero: '',
     colonia: '',
-    codigoPostal: '',
+    codigo_postal: '',
     estado: '',
     municipio: '',
     
@@ -27,27 +29,21 @@ function EmpleadoForm({ onClose, onSubmit }) {
     docActaNacimiento: null,
     docComprobanteDomicilio: null,
     docConstanciaFiscal: null,
-    docCartaRecomendacion: null,
-    docComprobanteEstudios: null,
     
     // Otros datos
-    telefonoEmergencia: '',
-    contactoEmergencia: '',
-    sucursal: '',
+    telefono_emergencia: '',
+    contacto_emergencia: '',
     
     // Datos Laborales
     puesto: '',
     departamento: '',
     turno: '',
-    contrato: ''
   });
 
   // Opciones para listboxes
   const opcionesEstado = ['Seleccionar...', 'Aguascalientes', 'Baja California', 'Baja California Sur', 'Campeche', 'Chiapas', 'Chihuahua', 'Ciudad de México', 'Coahuila', 'Colima', 'Durango', 'Estado de México', 'Guanajuato', 'Guerrero', 'Hidalgo', 'Jalisco', 'Michoacán', 'Morelos', 'Nayarit', 'Nuevo León', 'Oaxaca', 'Puebla', 'Querétaro', 'Quintana Roo', 'San Luis Potosí', 'Sinaloa', 'Sonora', 'Tabasco', 'Tamaulipas', 'Tlaxcala', 'Veracruz', 'Yucatán', 'Zacatecas'];
   
-  const opcionesTurno = ['Seleccionar...', 'Matutino', 'Vespertino', 'Nocturno', 'Mixto'];
-  const opcionesContrato = ['Seleccionar...', 'Tiempo Indefinido', 'Tiempo Determinado', 'Por Proyecto', 'Temporal', 'Prácticas'];
-  const opcionesSucursal = ['Seleccionar...', 'Sucursal Norte', 'Sucursal Sur', 'Sucursal Este', 'Sucursal Oeste', 'Planta Central'];
+  const opcionesTurno = ['Seleccionar...', 'Matutino', 'Vespertino'];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -65,14 +61,72 @@ function EmpleadoForm({ onClose, onSubmit }) {
     }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Datos del empleado:', formData);
-    if (onSubmit) {
-      onSubmit(formData);
-    }
-    onClose();
-  };
+  const handleSubmit = async (e) => {
+        e.preventDefault();
+        
+        // Mostrar loading (opcional)
+        // setIsLoading(true);
+        
+        try {
+            // Crear FormData para enviar archivos
+            const formDataToSend = new FormData();
+            
+            // Agregar campos de texto
+            const camposTexto = [
+                'nombre', 'apellido_paterno', 'apellido_materno', 
+                'fecha_nacimiento', 'telefono', 'correo', 'curp', 'rfc', 'nss',
+                'calle', 'numero', 'colonia', 'codigo_postal', 'estado', 'municipio',
+                'telefono_emergencia', 'contacto_emergencia',
+                'puesto', 'departamento', 'turno'
+            ];
+            
+            camposTexto.forEach(campo => {
+                if (formData[campo]) {
+                    formDataToSend.append(campo, formData[campo]);
+                }
+            });
+            
+            // Agregar archivos (si existen)
+            const archivos = {
+                'docCurp': 'curp_archivo',
+                'docIne': 'ine',
+                'docActaNacimiento': 'acta_nacimiento',
+                'docComprobanteDomicilio': 'comprobante_domicilio',
+                'docConstanciaFiscal': 'rfc_archivo',
+                'docCartaRecomendacion': 'carta_recomendacion',
+                'docComprobanteEstudios': 'comprobante_estudios'
+            };
+            
+            Object.keys(archivos).forEach(key => {
+                if (formData[key]) {
+                    formDataToSend.append(archivos[key], formData[key]);
+                }
+            });
+            
+            // Enviar al backend
+            const response = await empleadosService.crear(formDataToSend);
+            
+            if (response.success) {
+                console.log('✅ Empleado registrado:', response.data);
+                alert('Empleado registrado exitosamente');
+                
+                // Limpiar formulario (opcional)
+                // resetForm();
+                
+                // Cerrar modal o redirigir
+                if (onSubmit) {
+                    onSubmit(response.data);
+                }
+                onClose();
+            }
+            
+        } catch (error) {
+            console.error('❌ Error al registrar:', error);
+            alert(error.message || 'Error al registrar empleado');
+        } finally {
+            // setIsLoading(false);
+        }
+    };
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -107,7 +161,7 @@ function EmpleadoForm({ onClose, onSubmit }) {
                   onChange={handleChange}
                   placeholder="Nombre"
                   className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
-                  required
+                  
                 />
               </div>
               <div>
@@ -116,12 +170,11 @@ function EmpleadoForm({ onClose, onSubmit }) {
                 </label>
                 <input
                   type="text"
-                  name="apellidoPaterno"
-                  value={formData.apellidoPaterno}
+                  name="apellido_paterno"
+                  value={formData.apellido_paterno}
                   onChange={handleChange}
-                  placeholder="Apellido Paterno"
                   className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
-                  required
+                  
                 />
               </div>
               <div>
@@ -130,10 +183,9 @@ function EmpleadoForm({ onClose, onSubmit }) {
                 </label>
                 <input
                   type="text"
-                  name="apellidoMaterno"
-                  value={formData.apellidoMaterno}
+                  name="apellido_materno"
+                  value={formData.apellido_materno}
                   onChange={handleChange}
-                  placeholder="Apellido Materno"
                   className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
                 />
               </div>
@@ -143,11 +195,11 @@ function EmpleadoForm({ onClose, onSubmit }) {
                 </label>
                 <input
                   type="date"
-                  name="fechaNacimiento"
-                  value={formData.fechaNacimiento}
+                  name="fecha_nacimiento"
+                  value={formData.fecha_nacimiento}
                   onChange={handleChange}
                   className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
-                  required
+                  
                 />
               </div>
               <div>
@@ -161,7 +213,7 @@ function EmpleadoForm({ onClose, onSubmit }) {
                   onChange={handleChange}
                   placeholder="Ej: 555-123-4567"
                   className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
-                  required
+                  
                 />
               </div>
               <div>
@@ -175,7 +227,7 @@ function EmpleadoForm({ onClose, onSubmit }) {
                   onChange={handleChange}
                   placeholder="ejemplo@correo.com"
                   className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
-                  required
+                  
                 />
               </div>
               <div>
@@ -189,7 +241,7 @@ function EmpleadoForm({ onClose, onSubmit }) {
                   onChange={handleChange}
                   placeholder="CURP"
                   className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors uppercase"
-                  required
+                  
                 />
               </div>
               <div>
@@ -203,7 +255,7 @@ function EmpleadoForm({ onClose, onSubmit }) {
                   onChange={handleChange}
                   placeholder="RFC"
                   className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors uppercase"
-                  required
+                  
                 />
               </div>
               <div>
@@ -217,7 +269,7 @@ function EmpleadoForm({ onClose, onSubmit }) {
                   onChange={handleChange}
                   placeholder="Número de Seguridad Social"
                   className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
-                  required
+                  
                 />
               </div>
             </div>
@@ -238,7 +290,7 @@ function EmpleadoForm({ onClose, onSubmit }) {
                   onChange={handleChange}
                   placeholder="Calle"
                   className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
-                  required
+                  
                 />
               </div>
               <div>
@@ -252,7 +304,7 @@ function EmpleadoForm({ onClose, onSubmit }) {
                   onChange={handleChange}
                   placeholder="Número"
                   className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
-                  required
+                  
                 />
               </div>
               <div>
@@ -266,7 +318,7 @@ function EmpleadoForm({ onClose, onSubmit }) {
                   onChange={handleChange}
                   placeholder="Colonia"
                   className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
-                  required
+                  
                 />
               </div>
               <div>
@@ -275,12 +327,12 @@ function EmpleadoForm({ onClose, onSubmit }) {
                 </label>
                 <input
                   type="text"
-                  name="codigoPostal"
-                  value={formData.codigoPostal}
+                  name="codigo_postal"
+                  value={formData.codigo_postal}
                   onChange={handleChange}
                   placeholder="Código Postal"
                   className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
-                  required
+                  
                 />
               </div>
               <div>
@@ -292,7 +344,7 @@ function EmpleadoForm({ onClose, onSubmit }) {
                   value={formData.estado}
                   onChange={handleChange}
                   className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
-                  required
+                  
                 >
                   {opcionesEstado.map((opcion, index) => (
                     <option key={index} value={opcion}>{opcion}</option>
@@ -310,7 +362,7 @@ function EmpleadoForm({ onClose, onSubmit }) {
                   onChange={handleChange}
                   placeholder="Municipio"
                   className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
-                  required
+                  
                 />
               </div>
             </div>
@@ -330,7 +382,7 @@ function EmpleadoForm({ onClose, onSubmit }) {
                   onChange={handleFileChange}
                   accept=".pdf,.jpg,.jpeg,.png"
                   className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600"
-                  required
+                  
                 />
               </div>
               <div>
@@ -343,7 +395,7 @@ function EmpleadoForm({ onClose, onSubmit }) {
                   onChange={handleFileChange}
                   accept=".pdf,.jpg,.jpeg,.png"
                   className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600"
-                  required
+                  
                 />
               </div>
               <div>
@@ -356,7 +408,7 @@ function EmpleadoForm({ onClose, onSubmit }) {
                   onChange={handleFileChange}
                   accept=".pdf,.jpg,.jpeg,.png"
                   className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600"
-                  required
+                  
                 />
               </div>
               <div>
@@ -369,7 +421,7 @@ function EmpleadoForm({ onClose, onSubmit }) {
                   onChange={handleFileChange}
                   accept=".pdf,.jpg,.jpeg,.png"
                   className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600"
-                  required
+                  
                 />
               </div>
               <div>
@@ -382,24 +434,12 @@ function EmpleadoForm({ onClose, onSubmit }) {
                   onChange={handleFileChange}
                   accept=".pdf,.jpg,.jpeg,.png"
                   className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600"
-                  required
+                  
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Carta de Recomendación
-                </label>
-                <input
-                  type="file"
-                  name="docCartaRecomendacion"
-                  onChange={handleFileChange}
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Comprobante de Estudios <span className="text-red-400">*</span>
+                  NSS
                 </label>
                 <input
                   type="file"
@@ -407,7 +447,6 @@ function EmpleadoForm({ onClose, onSubmit }) {
                   onChange={handleFileChange}
                   accept=".pdf,.jpg,.jpeg,.png"
                   className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600"
-                  required
                 />
               </div>
             </div>
@@ -423,12 +462,12 @@ function EmpleadoForm({ onClose, onSubmit }) {
                 </label>
                 <input
                   type="tel"
-                  name="telefonoEmergencia"
-                  value={formData.telefonoEmergencia}
+                  name="telefono_emergencia"
+                  value={formData.telefono_emergencia}
                   onChange={handleChange}
                   placeholder="Teléfono de Emergencia"
                   className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
-                  required
+                  
                 />
               </div>
               <div>
@@ -437,29 +476,13 @@ function EmpleadoForm({ onClose, onSubmit }) {
                 </label>
                 <input
                   type="text"
-                  name="contactoEmergencia"
-                  value={formData.contactoEmergencia}
+                  name="contacto_emergencia"
+                  value={formData.contacto_emergencia}
                   onChange={handleChange}
                   placeholder="Nombre del contacto"
                   className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
-                  required
+                  
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Sucursal <span className="text-red-400">*</span>
-                </label>
-                <select
-                  name="sucursal"
-                  value={formData.sucursal}
-                  onChange={handleChange}
-                  className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
-                  required
-                >
-                  {opcionesSucursal.map((opcion, index) => (
-                    <option key={index} value={opcion}>{opcion}</option>
-                  ))}
-                </select>
               </div>
             </div>
           </div>
@@ -479,7 +502,7 @@ function EmpleadoForm({ onClose, onSubmit }) {
                   onChange={handleChange}
                   placeholder="Ej: Ingeniero de Producción"
                   className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
-                  required
+                  
                 />
               </div>
               <div>
@@ -493,7 +516,7 @@ function EmpleadoForm({ onClose, onSubmit }) {
                   onChange={handleChange}
                   placeholder="Ej: Producción"
                   className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
-                  required
+                  
                 />
               </div>
               <div>
@@ -505,25 +528,9 @@ function EmpleadoForm({ onClose, onSubmit }) {
                   value={formData.turno}
                   onChange={handleChange}
                   className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
-                  required
+                  
                 >
                   {opcionesTurno.map((opcion, index) => (
-                    <option key={index} value={opcion}>{opcion}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Contrato <span className="text-red-400">*</span>
-                </label>
-                <select
-                  name="contrato"
-                  value={formData.contrato}
-                  onChange={handleChange}
-                  className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
-                  required
-                >
-                  {opcionesContrato.map((opcion, index) => (
                     <option key={index} value={opcion}>{opcion}</option>
                   ))}
                 </select>

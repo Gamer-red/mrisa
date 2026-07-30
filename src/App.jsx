@@ -10,6 +10,7 @@ import { Almacen_layaout } from './layouts'
 import { Mantenimiento_layaout } from './layouts'
 import { Calidad_layaout } from './layouts'
 import { Ventas_layaout } from './layouts'
+import { Compras_layaout } from './layouts'
 
 //Produccion
 import { ProduccionDashboard } from './pages/produccion';
@@ -33,10 +34,14 @@ import { ReporteMantenimientoDashboard } from './pages/mantenimiento'
 //calidad
 import { CalidadDashboard } from './pages/calidad'
 import { ReporteDashboard } from './pages/calidad'
+import { MetrologiaDashboard } from './pages/calidad'
 
 //ventas
-
 import {Cotizaciones_dashboard} from './pages/ventas'
+import {StockDashboard} from './pages/ventas'
+
+//comrpras
+import { ComprasDashboard } from './pages/compras';
 
 
 // Componente para redirección según el rol
@@ -67,6 +72,9 @@ const RoleRedirect = () => {
             return <Navigate to="/calidad" />;
         case 'ventas':
             return <Navigate to="/ventas" />;
+        case 'compras':
+            return <Navigate to="/compras" />;
+
         
         default:
             return <Navigate to="/" />;
@@ -231,7 +239,16 @@ function App() {
                             </PrivateRoute>
                         }
                     />
-
+                    <Route
+                        path="/calidad/metrologia"
+                        element={
+                            <PrivateRoute allowedRoles={['calidad']}>
+                                <Calidad_layaout>
+                                    <MetrologiaDashboard />
+                                </Calidad_layaout>
+                            </PrivateRoute>
+                        }
+                    />
                     <Route
                         path="/ventas"
                         element={
@@ -242,7 +259,26 @@ function App() {
                             </PrivateRoute>
                         }
                     />
-
+                    <Route
+                        path="/ventas/stock"
+                        element={
+                            <PrivateRoute allowedRoles={['ventas']}>
+                                <Ventas_layaout>
+                                    <StockDashboard />
+                                </Ventas_layaout>
+                            </PrivateRoute>
+                        }
+                    />
+                    <Route
+                        path="/compras"
+                        element={
+                            <PrivateRoute allowedRoles={['compras']}>
+                                <Compras_layaout>
+                                    <ComprasDashboard />
+                                </Compras_layaout>
+                            </PrivateRoute>
+                        }
+                    />
                     {/* ========== PÁGINA NO AUTORIZADO ========== */}
                     <Route path="/unauthorized" element={<Unauthorized />} />
 

@@ -4,3 +4,4 @@ export { default as Almacen_layaout } from './almacen_layaout';
 export { default as Mantenimiento_layaout } from './mantenimiento_layaout';
 export { default as Calidad_layaout } from './calidad_layaout';
 export { default as Ventas_layaout } from './ventas_layaout';
+export { default as Compras_layaout } from './compras_layaout';

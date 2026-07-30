@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
-const { pool, testConnection } = require('../src/config/db');
+const { pool, testConnection } = require('./config/db');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -17,23 +17,20 @@ app.use(express.urlencoded({ extended: true }));
 // ========== RUTAS ==========
 console.log('🔄 Cargando rutas...');
 
-try {
-    const authRoutes = require('../src/routes/auth');
-    console.log('✅ Auth routes cargadas:', typeof authRoutes);
-    app.use('/api/auth', authRoutes);
-} catch (error) {
-    console.error('❌ Error cargando auth routes:', error.message);
-}
+// Rutas de autenticación
+const authRoutes = require('./routes/auth');
+app.use('/api/auth', authRoutes);
 
-/*try {
-    const usuariosRoutes = require('../src/routes/usuarios');
-    console.log('✅ Usuarios routes cargadas:', typeof usuariosRoutes);
-    app.use('/api/usuarios', usuariosRoutes);
-} catch (error) {
-    console.error('❌ Error cargando usuarios routes:', error.message);
-}*/
+// Rutas de empleados (NUEVO)
+const empleadosRoutes = require('./routes/empleados/empleadosRoutes');
+app.use('/api/empleados', empleadosRoutes);
 
-// Endpoint de salud
+// ========== RUTAS ADICIONALES (Opcional) ==========
+// Si tienes otras rutas como usuarios, puedes agregarlas aquí
+// const usuariosRoutes = require('./routes/usuarios');
+// app.use('/api/usuarios', usuariosRoutes);
+
+// ========== ENDPOINT DE SALUD ==========
 app.get('/api/health', async (req, res) => {
     try {
         const client = await pool.connect();
@@ -56,13 +53,23 @@ app.get('/api/health', async (req, res) => {
     }
 });
 
-// Iniciar servidor
+// ========== INICIAR SERVIDOR ==========
 const startServer = async () => {
     const connected = await testConnection();
     
     app.listen(PORT, () => {
         console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
         console.log(`📡 Base de datos: ${connected ? '✅ Conectada' : '❌ No conectada'}`);
+        console.log('\n📋 Endpoints disponibles:');
+        console.log('   🔓 Rutas públicas:');
+        console.log('   POST   /api/auth/login - Iniciar sesión');
+        console.log('\n   🔒 Rutas protegidas (requieren token):');
+        console.log('   GET    /api/auth/verify - Verificar token');
+        console.log('   GET    /api/auth/perfil - Obtener perfil');
+        console.log('   GET    /api/health - Verificar estado');
+        console.log('\n   👥 Rutas de Empleados (solo RH):');
+        console.log('   POST   /api/empleados - Crear nuevo empleado');
+        console.log('   GET    /api/empleados - Obtener todos los empleados');
     });
 };
 
