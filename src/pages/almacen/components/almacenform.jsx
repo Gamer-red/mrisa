@@ -149,42 +149,8 @@ function AlmacenForm({ onClose, onSubmit }) {
               </select>
             </div>
 
-            {/* Ruta de Abastecimiento */}
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Ruta de Abastecimiento <span className="text-red-400">*</span>
-              </label>
-              <select
-                name="rutaAbastecimiento"
-                value={formData.rutaAbastecimiento}
-                onChange={handleChange}
-                className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
-                required
-              >
-                {opcionesRutaAbastecimiento.map((opcion, index) => (
-                  <option key={index} value={opcion}>{opcion}</option>
-                ))}
-              </select>
-            </div>
-
             {/* Se puede vender? */}
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                ¿Se puede vender? <span className="text-red-400">*</span>
-              </label>
-              <select
-                name="sePuedeVender"
-                value={formData.sePuedeVender}
-                onChange={handleChange}
-                className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
-                required
-              >
-                {opcionesSePuedeVender.map((opcion, index) => (
-                  <option key={index} value={opcion}>{opcion}</option>
-                ))}
-              </select>
-            </div>
-
+            
             {/* Stock Actual */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -219,42 +185,6 @@ function AlmacenForm({ onClose, onSubmit }) {
                   <option key={index} value={opcion}>{opcion}</option>
                 ))}
               </select>
-            </div>
-
-            {/* Stock Mínimo */}
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Stock Mínimo <span className="text-red-400">*</span>
-              </label>
-              <input
-                type="number"
-                name="stockMinimo"
-                value={formData.stockMinimo}
-                onChange={handleChange}
-                placeholder="0"
-                min="0"
-                step="0.01"
-                className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                required
-              />
-            </div>
-
-            {/* Costo Unitario */}
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Costo Unitario <span className="text-red-400">*</span>
-              </label>
-              <input
-                type="number"
-                name="costoUnitario"
-                value={formData.costoUnitario}
-                onChange={handleChange}
-                placeholder="0.00"
-                min="0"
-                step="0.01"
-                className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                required
-              />
             </div>
           </div>
 

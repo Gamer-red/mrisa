@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import CalidadLista from './components/calidadlista';
 import CalidadForm from './components/calidadform';
-import CalidadVerDetalles from './components/CalidadVerDetalles';
+import CalidadVerDetalles from './components/calidadverdetalles';
+import { calidadService } from '../../services/calidadService';
 
 function ReporteDashboard() {
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
@@ -94,27 +95,22 @@ function ReporteDashboard() {
   };
 
   // Función para manejar el envío del formulario
-  const handleSubmitForm = (data) => {
-    console.log('Nueva inspección:', data);
-    
-    // Crear nueva inspección con estado Pendiente
-    const nuevaInspeccion = {
-      id: Math.max(...inspecciones.map(i => i.id), 0) + 1,
-      orden: data.ordenProduccion,
-      producto: data.producto,
-      tipo: data.tipoInspeccion,
-      operador: data.operador,
-      maquina: data.maquina,
-      turno: data.turno,
-      fecha: new Date().toISOString().split('T')[0],
-      estado: 'Pendiente',
-      tolerancias: data.tolerancias || [],
-      caracteristicasCriticas: data.caracteristicasCriticas || [],
-      notas: data.notas || ''
-    };
+  const handleSubmitForm = async (data) => {
+   try{
+    const response = await calidadService.crearInspeccion(data);
+  
 
-    setInspecciones(prev => [...prev, nuevaInspeccion]);
-    setMostrarFormulario(false);
+    if(response.success){
+      alert('✅ Inspección creada exitosamente');
+      setMostrarFormulario(false);
+    }else {
+            alert('❌ ' + (response.message || 'Error al crear inspección'));
+      }
+
+   }catch(error){
+    console.error('🔴 Error en padre:', error);
+    alert('Error: ' + (error.message || 'Error al crear inspección'));
+   }
   };
 
   // Función para ver inspección

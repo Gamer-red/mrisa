@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef  } from 'react';
+import { calidadService } from '../../../services/calidadService';
 
-function CalidadForm({ onClose, onSubmit }) {
+function CalidadForm({ onSubmit,onClose,  }) {
   const [formData, setFormData] = useState({
     ordenProduccion: '',
     tipoInspeccion: '',
@@ -12,6 +13,8 @@ function CalidadForm({ onClose, onSubmit }) {
     caracteristicasCriticas: [], // Array de strings
     notas: ''
   });
+
+ const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Estado temporal para el campo de tolerancia
   const [toleranciaTemp, setToleranciaTemp] = useState({
@@ -44,7 +47,6 @@ function CalidadForm({ onClose, onSubmit }) {
     'Seleccionar...',
     'Matutino',
     'Vespertino',
-    'Nocturno'
   ];
 
   // Manejar cambios en los inputs principales
@@ -129,14 +131,23 @@ function CalidadForm({ onClose, onSubmit }) {
   };
 
   // Manejar envío del formulario
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Datos de la inspección:', formData);
-    if (onSubmit) {
-      onSubmit(formData);
-    }
-    onClose();
-  };
+      const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        if (isSubmitting) return;
+
+        setIsSubmitting(true);
+
+        try {
+
+          await onSubmit(formData);
+
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsSubmitting(false);
+        }
+      };
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -437,21 +448,26 @@ function CalidadForm({ onClose, onSubmit }) {
           </div>
 
           {/* Botones */}
-          <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-slate-700">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-6 py-2 bg-slate-700/50 hover:bg-slate-600/50 text-white rounded-lg transition-colors"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              className="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors shadow-lg shadow-blue-500/30"
-            >
-              Crear Inspección
-            </button>
-          </div>
+           <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-slate-700">
+                <button
+                    type="button"
+                    onClick={onClose}
+                    className="px-6 py-2 bg-slate-700/50 hover:bg-slate-600/50 text-white rounded-lg transition-colors"
+                >
+                    Cancelar
+                </button>
+                <button
+                    type="submit"
+                   disabled={isSubmitting}
+                    className={`px-6 py-2 text-white rounded-lg font-medium transition-colors shadow-lg shadow-blue-500/30 ${
+                        isSubmitting.current 
+                            ? 'bg-blue-400 cursor-not-allowed' 
+                            : 'bg-blue-500 hover:bg-blue-600'
+                    }`}
+                >
+                    {isSubmitting ? "Guardando..." : "Crear Inspección"}
+                </button>
+            </div>
         </form>
       </div>
     </div>

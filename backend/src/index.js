@@ -2,6 +2,13 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 const { pool, testConnection } = require('./config/db');
+const maquinasRoutes = require('../src/routes/maquinas/maquinas');
+const mantenimientoRoutes = require('../src/routes/mantenimiento/mantenimiento')
+
+const materialRoutes = require ('../src/routes/material/material')
+
+const produccionRoutes = require ('../src/routes/produccion/produccion')
+
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -25,10 +32,16 @@ app.use('/api/auth', authRoutes);
 const empleadosRoutes = require('./routes/empleados/empleadosRoutes');
 app.use('/api/empleados', empleadosRoutes);
 
-// ========== RUTAS ADICIONALES (Opcional) ==========
-// Si tienes otras rutas como usuarios, puedes agregarlas aquí
-// const usuariosRoutes = require('./routes/usuarios');
-// app.use('/api/usuarios', usuariosRoutes);
+const calidadRoutes = require('./routes/calidad/calidadRoutes');
+app.use('/api/calidad', calidadRoutes);
+
+app.use('/api/maquinas', maquinasRoutes);
+
+app.use('/api/material', materialRoutes);
+
+app.use('/api/mantenimiento',mantenimientoRoutes)
+
+app.use('/api/produccion',produccionRoutes)
 
 // ========== ENDPOINT DE SALUD ==========
 app.get('/api/health', async (req, res) => {
@@ -61,15 +74,6 @@ const startServer = async () => {
         console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
         console.log(`📡 Base de datos: ${connected ? '✅ Conectada' : '❌ No conectada'}`);
         console.log('\n📋 Endpoints disponibles:');
-        console.log('   🔓 Rutas públicas:');
-        console.log('   POST   /api/auth/login - Iniciar sesión');
-        console.log('\n   🔒 Rutas protegidas (requieren token):');
-        console.log('   GET    /api/auth/verify - Verificar token');
-        console.log('   GET    /api/auth/perfil - Obtener perfil');
-        console.log('   GET    /api/health - Verificar estado');
-        console.log('\n   👥 Rutas de Empleados (solo RH):');
-        console.log('   POST   /api/empleados - Crear nuevo empleado');
-        console.log('   GET    /api/empleados - Obtener todos los empleados');
     });
 };
 
