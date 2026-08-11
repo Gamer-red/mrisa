@@ -1,24 +1,26 @@
 import React, { useState } from 'react';
+import { crearOrdenProduccion } from '../../../../services/produccionService';
 
 function OrdenForm({ onClose, onSubmit }) {
+
   const [formData, setFormData] = useState({
-    productoInventario: '',
-    productoPieza: '',
+    id_material: '',
+    producto: '',
     cliente: '',
-    cantidadRequerida: '',
-    fechaInicio: '',
-    fechaEntrega: '',
+    cantidad: '',
+    fecha_inicio: '',
+    fecha_entrega: '',
     prioridad: '',
-    noPlano: '',
+    numero_plano: '',
     lote: '',
     material: '',
-    gradoMaterial: '',
+    grado_material: '',
     notas: ''
   });
 
   // Opciones para los listbox
   const opcionesProducto = ['Seleccionar...', 'Producto A', 'Producto B', 'Producto C'];
-  const opcionesCliente = ['Seleccionar...', 'Cliente 1', 'Cliente 2', 'Cliente 3'];
+  const opcionesCliente = ['Seleccionar...', 'Meritor', 'SFK'];
   const opcionesPrioridad = ['Seleccionar...', 'Baja', 'Normal', 'Alta', 'Urgente'];
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -28,13 +30,21 @@ function OrdenForm({ onClose, onSubmit }) {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Datos del formulario:', formData);
-    if (onSubmit) {
-      onSubmit(formData);
+    
+    try {
+        // Llamas a la función del service
+        const resultado = await crearOrdenProduccion(formData);
+        
+        // Si llegas aquí, fue exitoso
+        console.log('Orden creada:', resultado);
+        // Cerrar modal, mostrar mensaje, limpiar form...
+        
+    } catch (error) {
+        // Aquí manejas el error
+        alert(error.message);
     }
-    onClose();
   };
 
   return (
@@ -62,8 +72,6 @@ function OrdenForm({ onClose, onSubmit }) {
                 Producto desde inventario <span className="text-gray-500 text-xs">(opcional)</span>
               </label>
               <select
-                name="productoInventario"
-                value={formData.productoInventario}
                 onChange={handleChange}
                 className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
               >
@@ -80,8 +88,8 @@ function OrdenForm({ onClose, onSubmit }) {
               </label>
               <input
                 type="text"
-                name="productoPieza"
-                value={formData.productoPieza}
+                name="producto"
+                value={formData.producto}
                 onChange={handleChange}
                 placeholder="Ej: Engranaje tipo A"
                 className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
@@ -96,7 +104,7 @@ function OrdenForm({ onClose, onSubmit }) {
               </label>
               <select
                 name="cliente"
-                value={formData.cliente}
+                value = {formData.cliente}
                 onChange={handleChange}
                 className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
                 required
@@ -114,8 +122,8 @@ function OrdenForm({ onClose, onSubmit }) {
                 </label>
                 <input
                     type="number"
-                    name="cantidadRequerida"
-                    value={formData.cantidadRequerida}
+                    name="cantidad"
+                    value={formData.cantidad}
                     onChange={handleChange}
                     placeholder="Ej: 100"
                     min="0"
@@ -123,7 +131,7 @@ function OrdenForm({ onClose, onSubmit }) {
                     className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     required
                 />
-                </div>
+            </div>
             {/* Fecha Inicio */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -131,8 +139,8 @@ function OrdenForm({ onClose, onSubmit }) {
               </label>
               <input
                 type="date"
-                name="fechaInicio"
-                value={formData.fechaInicio}
+                name="fecha_inicio"
+                value={formData.fecha_inicio}
                 onChange={handleChange}
                 className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
                 required
@@ -146,8 +154,8 @@ function OrdenForm({ onClose, onSubmit }) {
               </label>
               <input
                 type="date"
-                name="fechaEntrega"
-                value={formData.fechaEntrega}
+                name="fecha_entrega"
+                value={formData.fecha_entrega}
                 onChange={handleChange}
                 className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
                 required
@@ -179,8 +187,8 @@ function OrdenForm({ onClose, onSubmit }) {
               </label>
               <input
                 type="text"
-                name="noPlano"
-                value={formData.noPlano}
+                name="numero_plano"
+                value={formData.numero_plano}
                 onChange={handleChange}
                 placeholder="Ej: PLAN-001"
                 className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
@@ -227,8 +235,8 @@ function OrdenForm({ onClose, onSubmit }) {
               </label>
               <input
                 type="text"
-                name="gradoMaterial"
-                value={formData.gradoMaterial}
+                name="grado_material"
+                value={formData.grado_material}
                 onChange={handleChange}
                 placeholder="Ej: 304, AISI 316"
                 className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
@@ -243,10 +251,10 @@ function OrdenForm({ onClose, onSubmit }) {
               Notas / Instrucciones especiales
             </label>
             <textarea
+              rows="4"
               name="notas"
               value={formData.notas}
               onChange={handleChange}
-              rows="4"
               placeholder="Instrucciones adicionales para la producción..."
               className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors resize-none"
             />

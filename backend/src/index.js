@@ -4,9 +4,9 @@ require('dotenv').config();
 const { pool, testConnection } = require('./config/db');
 const maquinasRoutes = require('../src/routes/maquinas/maquinas');
 const mantenimientoRoutes = require('../src/routes/mantenimiento/mantenimiento')
-
+const empleadosRoutes = require('./routes/empleados/empleadosRoutes');
 const materialRoutes = require ('../src/routes/material/material')
-
+const calidadRoutes = require('./routes/calidad/calidadRoutes');
 const produccionRoutes = require ('../src/routes/produccion/produccion')
 
 
@@ -25,14 +25,12 @@ app.use(express.urlencoded({ extended: true }));
 console.log('🔄 Cargando rutas...');
 
 // Rutas de autenticación
-const authRoutes = require('./routes/auth');
-app.use('/api/auth', authRoutes);
+//const authRoutes = require('./routes/auth');
+//app.use('/api/auth', authRoutes);
 
 // Rutas de empleados (NUEVO)
-const empleadosRoutes = require('./routes/empleados/empleadosRoutes');
 app.use('/api/empleados', empleadosRoutes);
 
-const calidadRoutes = require('./routes/calidad/calidadRoutes');
 app.use('/api/calidad', calidadRoutes);
 
 app.use('/api/maquinas', maquinasRoutes);

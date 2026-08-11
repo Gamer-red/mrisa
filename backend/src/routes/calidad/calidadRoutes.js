@@ -4,7 +4,9 @@ const { verificarToken, verificarRol } = require('../../../middleware/authMiddle
 const {
     crearInspeccion,
     obtenerInspecciones,
-    obtenerInspeccionPorId
+    obtenerInspeccionPorId,
+    actualizarInspeccionPorId,
+    eliminarInspeccionPorId
 } = require('../../../controllers/calidadController');
 
 // ========== RUTAS PROTEGIDAS (SOLO CALIDAD) ==========
@@ -31,6 +33,20 @@ router.get(
     verificarToken,
     verificarRol(['calidad']),
     obtenerInspeccionPorId
+);
+
+router.put(
+    '/inspeccion/:id',
+    verificarToken,
+    verificarRol(['calidad']),
+    actualizarInspeccionPorId
+);
+
+router.delete(
+    '/inspeccion/:id',
+    verificarToken,
+    verificarRol(['calidad']),
+    eliminarInspeccionPorId
 );
 
 module.exports = router;

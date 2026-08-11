@@ -57,7 +57,6 @@ const crearInspeccion = async (req, res) => {
                     nominal
                 ) VALUES ($1, $2, $3, $4, $5)
             `;
-
             for (const tol of tolerancias) {
                 await pool.query(queryTolerancia, [
                     id_inspeccion,
@@ -192,8 +191,192 @@ const obtenerInspeccionPorId = async (req, res) => {
     }
 };
 
+const actualizarInspeccionPorId = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const {
+            orden_produccion,
+            tipo_inspeccion,
+            producto,
+            operador,
+            maquina,
+            turno,
+            notas,
+            tolerancias = [],
+            caracteristicas = []
+        } = req.body;
+
+        // Verificar que la inspección existe
+        const checkQuery = 'SELECT id_inspeccion FROM inspeccion WHERE id_inspeccion = $1';
+        const checkResult = await pool.query(checkQuery, [id]);
+        
+        if (checkResult.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Inspección no encontrada'
+            });
+        }
+
+        // Iniciar transacción
+        await pool.query('BEGIN');
+
+        // 1. Actualizar la inspección principal
+        const queryInspeccion = `
+            UPDATE inspeccion 
+            SET 
+                orden_produccion = $1,
+                tipo_inspeccion = $2,
+                producto = $3,
+                operador = $4,
+                maquina = $5,
+                turno = $6,
+                notas = $7,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id_inspeccion = $8
+            RETURNING id_inspeccion
+        `;
+
+        const valuesInspeccion = [
+            orden_produccion || null,
+            tipo_inspeccion || null,
+            producto || null,
+            operador || null,
+            maquina || null,
+            turno || null,
+            notas || null,
+            id
+        ];
+
+        const resultInspeccion = await pool.query(queryInspeccion, valuesInspeccion);
+        
+        // 2. Eliminar tolerancias dimensionales existentes
+        await pool.query('DELETE FROM tolerancias_dimencionales WHERE id_inspeccion = $1', [id]);
+
+        // 3. Insertar nuevas tolerancias dimensionales
+        let toleranciasInsertadas = 0;
+        if (tolerancias && tolerancias.length > 0) {
+            const queryTolerancia = `
+                INSERT INTO tolerancias_dimencionales (
+                    id_inspeccion,
+                    dimension,
+                    minimo,
+                    maximo,
+                    nominal
+                ) VALUES ($1, $2, $3, $4, $5)
+            `;
+            for (const tol of tolerancias) {
+                await pool.query(queryTolerancia, [
+                    id,
+                    tol.dimension || null,
+                    tol.minimo || null,
+                    tol.maximo || null,
+                    tol.nominal || null
+                ]);
+                toleranciasInsertadas++;
+            }
+        }
+
+        // 4. Eliminar características críticas existentes
+        await pool.query('DELETE FROM caracteristicas_criticas WHERE id_inspeccion = $1', [id]);
+
+        // 5. Insertar nuevas características críticas
+        let caracteristicasInsertadas = 0;
+        if (caracteristicas && caracteristicas.length > 0) {
+            const queryCaracteristica = `
+                INSERT INTO caracteristicas_criticas (
+                    id_inspeccion,
+                    caracteristica
+                ) VALUES ($1, $2)
+            `;
+
+            for (const car of caracteristicas) {
+                await pool.query(queryCaracteristica, [
+                    id,
+                    car.caracteristica || null
+                ]);
+                caracteristicasInsertadas++;
+            }
+        }
+
+        // Confirmar transacción
+        await pool.query('COMMIT');
+
+        // Respuesta exitosa
+        res.status(200).json({
+            success: true,
+            message: 'Inspección actualizada exitosamente',
+            data: {
+                id_inspeccion: id,
+                orden_produccion: orden_produccion || null,
+                tolerancias: toleranciasInsertadas,
+                caracteristicas: caracteristicasInsertadas
+            }
+        });
+
+    } catch (error) {
+        // Hacer rollback en caso de error
+        await pool.query('ROLLBACK');
+        
+        res.status(500).json({
+            success: false,
+            message: 'Error al actualizar inspección',
+            error: error.message
+        });
+    }
+};
+
+const eliminarInspeccionPorId = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Verificar que la inspección existe
+        const checkQuery = 'SELECT id_inspeccion FROM inspeccion WHERE id_inspeccion = $1';
+        const checkResult = await pool.query(checkQuery, [id]);
+        
+        if (checkResult.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Inspección no encontrada'
+            });
+        }
+
+        // Iniciar transacción
+        await pool.query('BEGIN');
+
+        // Eliminar usando CASCADE
+        // Esto eliminará la inspección y todas sus dependencias
+        const deleteQuery = 'DELETE FROM inspeccion WHERE id_inspeccion = $1';
+        await pool.query(deleteQuery, [id]);
+
+        // Confirmar transacción
+        await pool.query('COMMIT');
+
+        // Respuesta exitosa
+        res.status(200).json({
+            success: true,
+            message: 'Inspección y sus registros relacionados eliminados exitosamente',
+            data: {
+                id_inspeccion: id
+            }
+        });
+
+    } catch (error) {
+        // Hacer rollback en caso de error
+        await pool.query('ROLLBACK');
+        
+        res.status(500).json({
+            success: false,
+            message: 'Error al eliminar inspección',
+            error: error.message
+        });
+    }
+};
+
+
 module.exports = {
     crearInspeccion,
     obtenerInspecciones,
-    obtenerInspeccionPorId
+    obtenerInspeccionPorId,
+    actualizarInspeccionPorId,
+    eliminarInspeccionPorId
 };

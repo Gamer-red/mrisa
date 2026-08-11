@@ -114,41 +114,41 @@ function App() {
                     <Route
                         path="/produccion"
                         element={
-                            <PrivateRoute allowedRoles={['produccion']}>
+                           // <PrivateRoute allowedRoles={['produccion']}>
                                 <ProduccionLayout>
                                     <ProduccionDashboard />
                                 </ProduccionLayout>
-                            </PrivateRoute>
+                           // </PrivateRoute>
                         }
                     />
                     <Route
                         path="/produccion/ordenes"
                         element={
-                            <PrivateRoute allowedRoles={['produccion']}>
+                            //<PrivateRoute allowedRoles={['produccion']}>
                                 <ProduccionLayout>
                                     <OrdenesDashboard />
                                 </ProduccionLayout>
-                            </PrivateRoute>
+                            //</PrivateRoute>
                         }
                     />
                     <Route
                         path="/produccion/inventario"
                         element={
-                            <PrivateRoute allowedRoles={['produccion']}>
+                            //<PrivateRoute allowedRoles={['produccion']}>
                                 <ProduccionLayout>
                                     <InvenatarioProduccionDashboard />
                                 </ProduccionLayout>
-                            </PrivateRoute>
+                            //</PrivateRoute>
                         }
                     />
                     <Route
                         path="/produccion/operador"
                         element={
-                            <PrivateRoute allowedRoles={['produccion']}>
+                           // <PrivateRoute allowedRoles={['produccion']}>
                                 <ProduccionLayout>
                                     <OperadorDashboard />
                                 </ProduccionLayout>
-                            </PrivateRoute>
+                           // </PrivateRoute>
                         }
                     />
 
@@ -156,21 +156,21 @@ function App() {
                     <Route
                         path="/rh"
                         element={
-                            <PrivateRoute allowedRoles={['recursos_humanos']}>
+                           // <PrivateRoute allowedRoles={['recursos_humanos']}>
                                 <RH_layaout>
                                     <RHDashboard />
                                 </RH_layaout>
-                            </PrivateRoute>
+                           // </PrivateRoute>
                         }
                     />
                     <Route
                         path="/rh/empleados"
                         element={
-                            <PrivateRoute allowedRoles={['recursos_humanos']}>
+                          //  <PrivateRoute allowedRoles={['recursos_humanos']}>
                                 <RH_layaout>
                                     <EmpleadosDashboard />
                                 </RH_layaout>
-                            </PrivateRoute>
+                          //  </PrivateRoute>
                         }
                     />
 
@@ -178,21 +178,21 @@ function App() {
                     <Route
                         path="/almacen"
                         element={
-                            <PrivateRoute allowedRoles={['almacen']}>
+                           // <PrivateRoute allowedRoles={['almacen']}>
                                 <Almacen_layaout>
                                     <AlmacenDashboard />
                                 </Almacen_layaout>
-                            </PrivateRoute>
+                           // </PrivateRoute>
                         }
                     />
                     <Route
                         path="/almacen/inventario"
                         element={
-                            <PrivateRoute allowedRoles={['almacen']}>
+                           // <PrivateRoute allowedRoles={['almacen']}>
                                 <Almacen_layaout>
                                     <InventarioDashboardAlmacen />
                                 </Almacen_layaout>
-                            </PrivateRoute>
+                           // </PrivateRoute>
                         }
                     />
 
@@ -200,21 +200,21 @@ function App() {
                     <Route
                         path="/mantenimiento"
                         element={
-                            <PrivateRoute allowedRoles={['mantenimiento']}>
+                          //  <PrivateRoute allowedRoles={['mantenimiento']}>
                                 <Mantenimiento_layaout>
                                     <MantenimientoDashboard />
                                 </Mantenimiento_layaout>
-                            </PrivateRoute>
+                          //  </PrivateRoute>
                         }
                     />
                     <Route
                         path="/mantenimiento/reporte"
                         element={
-                            <PrivateRoute allowedRoles={['mantenimiento']}>
+                           // <PrivateRoute allowedRoles={['mantenimiento']}>
                                 <Mantenimiento_layaout>
                                     <ReporteMantenimientoDashboard />
                                 </Mantenimiento_layaout>
-                            </PrivateRoute>
+                           // </PrivateRoute>
                         }
                     />
 
@@ -222,61 +222,61 @@ function App() {
                     <Route
                         path="/calidad"
                         element={
-                            <PrivateRoute allowedRoles={['calidad']}>
+                          //  <PrivateRoute allowedRoles={['calidad']}>
                                 <Calidad_layaout>
                                     <CalidadDashboard />
                                 </Calidad_layaout>
-                            </PrivateRoute>
+                          //  </PrivateRoute>
                         }
                     />
                     <Route
                         path="/calidad/reporte"
                         element={
-                            <PrivateRoute allowedRoles={['calidad']}>
+                          //  <PrivateRoute allowedRoles={['calidad']}>
                                 <Calidad_layaout>
                                     <ReporteDashboard />
                                 </Calidad_layaout>
-                            </PrivateRoute>
+                          //  </PrivateRoute>
                         }
                     />
                     <Route
                         path="/calidad/metrologia"
                         element={
-                            <PrivateRoute allowedRoles={['calidad']}>
+                          //  <PrivateRoute allowedRoles={['calidad']}>
                                 <Calidad_layaout>
                                     <MetrologiaDashboard />
                                 </Calidad_layaout>
-                            </PrivateRoute>
+                          //  </PrivateRoute>
                         }
                     />
                     <Route
                         path="/ventas"
                         element={
-                            <PrivateRoute allowedRoles={['ventas']}>
+                           // <PrivateRoute allowedRoles={['ventas']}>
                                 <Ventas_layaout>
                                     <Cotizaciones_dashboard />
                                 </Ventas_layaout>
-                            </PrivateRoute>
+                           // </PrivateRoute>
                         }
                     />
                     <Route
                         path="/ventas/stock"
                         element={
-                            <PrivateRoute allowedRoles={['ventas']}>
+                           // <PrivateRoute allowedRoles={['ventas']}>
                                 <Ventas_layaout>
                                     <StockDashboard />
                                 </Ventas_layaout>
-                            </PrivateRoute>
+                           // </PrivateRoute>
                         }
                     />
                     <Route
                         path="/compras"
                         element={
-                            <PrivateRoute allowedRoles={['compras']}>
+                           // <PrivateRoute allowedRoles={['compras']}>
                                 <Compras_layaout>
                                     <ComprasDashboard />
                                 </Compras_layaout>
-                            </PrivateRoute>
+                           // </PrivateRoute>
                         }
                     />
                     {/* ========== PÁGINA NO AUTORIZADO ========== */}

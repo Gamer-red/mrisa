@@ -71,7 +71,8 @@ const crearEmpleado = async (req, res) => {
             contacto_emergencia,
             puesto,
             departamento,
-            turno
+            turno,
+            activo
         } = req.body;
 
         // Iniciar transacción
@@ -99,8 +100,9 @@ const crearEmpleado = async (req, res) => {
                 contacto_emergencia,
                 puesto,
                 departamento,
-                turno
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
+                turno,
+                activo
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
             RETURNING id_empleado
         `;
 
@@ -124,7 +126,8 @@ const crearEmpleado = async (req, res) => {
             contacto_emergencia || null,
             puesto || null,
             departamento || null,
-            turno || null
+            turno || null,
+            activo || null
         ];
 
         const result = await pool.query(query, values);
@@ -220,17 +223,27 @@ const obtenerEmpleados = async (req, res) => {
     try {
         const result = await pool.query(
             `SELECT 
-                id_empleado,
                 nombre,
-                Apellido_paterno,
-                Apellido_materno,
-                correo,
+                apellido_paterno,
+                apellido_materno,
+                fecha_nacimiento,
                 telefono,
+                correo,
+                curp,
+                rfc,
+                nss,
+                calle,
+                numero,
+                colonia,
+                codigo_postal,
+                estado,
+                municipio,
+                telefono_emergencia,
+                contacto_emergencia,
                 puesto,
                 departamento,
                 turno,
-                fecha_nacimiento,
-                created_at
+                activo
             FROM empleados 
             ORDER BY id_empleado DESC`
         );
@@ -250,7 +263,172 @@ const obtenerEmpleados = async (req, res) => {
     }
 };
 
+const obetenerEmpleadoPorId = async (req, res)=> {
+
+    try{
+    const { id } = req.params;
+
+    if(isNaN(id) || id<=9){
+        return res.status(400).json({
+            success: false,
+            message: 'El id debe ser un numero valido mayor a 0'
+        })
+    }
+
+    const query = `SELECT id_empleado,
+                nombre,
+                apellido_paterno,
+                apellido_materno,
+                fecha_nacimiento,
+                telefono,
+                correo,
+                curp,
+                rfc,
+                nss,
+                calle,
+                numero,
+                colonia,
+                codigo_postal,
+                estado,
+                municipio,
+                telefono_emergencia,
+                contacto_emergencia,
+                puesto,
+                departamento,
+                turno,
+                activo
+            FROM empleados WHERE id_empleado = $1 `;
+    const result = await pool.query(query, [id]);
+    const empleado = result.rows[0];
+
+    if(!empleado){
+            return res.status(404).json({
+                success:false,
+                message:`no se encontro el usuario con el ID: ${id}`
+            });
+        }
+
+    res.status(200).json({
+        success:true,
+        data:empleado
+    })
+
+    }catch(error){
+        console.error("Error al obtener el empleado por ID", error);
+
+        res.status(500).json({
+            success:false,
+            message:'Error al obtener el usuario',
+            error:error.message
+        });
+    }
+}
+
+const empleadoActualizadoPorId = async (req,res) =>{
+
+    try{
+        const { id } = req.params;
+    const {
+            nombre,
+            apellido_paterno,
+            apellido_materno,
+            fecha_nacimiento,
+            telefono,
+            correo,
+            curp,
+            rfc,
+            nss,
+            calle,
+            numero,
+            colonia,
+            codigo_postal,
+            estado,
+            municipio,
+            telefono_emergencia,
+            contacto_emergencia,
+            puesto,
+            departamento,
+            turno,
+            activo
+    } = req.body;
+
+    const query = 'UPDATE empleados SET nombre = $1, apellido_paterno = $2, apellido_materno = $3, fecha_nacimineto = $4, telefono = $5, correo = $6, curp = $7, rfc = $8, nss = $9, calle = $10, numero = $11, colonia = $12, codigo_postal = $13, estado = $14, municipio = $15, telefono_emergencia = $16, contacto_emergencia = $17, puesto = $18, departamento = $19, turno = $20 RETURNING nombre,apellido_paterno,apellido_materno, fecha_nacimiento,telefono, correo,curp,rfc,  nss,calle, numero, colonia,codigo_postal,estado,municipio, telefono_emergencia,contacto_emergencia,puesto, departamento, turno, activo'
+
+    const values = [
+            nombre || null,
+            apellido_paterno || null,
+            apellido_materno || null,
+            fecha_nacimiento || null,
+            telefono || null,
+            correo || null,
+            curp || null,
+            rfc || null,
+            nss || null,
+            calle || null,
+            numero || null,
+            colonia || null,
+            codigo_postal || null,
+            estado || null,
+            municipio || null,
+            telefono_emergencia || null,
+            contacto_emergencia || null,
+            puesto || null,
+            departamento || null,
+            turno || null,
+            activo || null
+        ];
+    const result = await pool.query(query,values);
+    const empleadoActualizado = result.rows[0];
+
+    res.status(200).json({
+            success:true,
+            message: 'empleado actualizado correctamente',
+            data: empleadoActualizado
+        });
+
+    }catch(error){
+        console.error('Error al al actualizar el empleado:', error);
+
+         res.status(500).json({
+            success:false,
+            message: 'Errro al actualizar el empleado',
+            error: error.message
+        });
+    }            
+}
+
+const bajaEmpleadoPorId = async (req, res)=> {
+    try{
+        const { id } = req.params;
+
+        const query = 'UPDATE empleados SET activo = false where id_empleado = $1';
+
+        const result = await pool.query(query,[id]);
+        const empleado = result.rows[0];
+
+        res.status(200).json({
+            success:true,
+            data:empleado
+        })
+
+    }catch(error){
+
+        console.error('Error al dar de baja al empleado', error);
+
+        res.status(500).json({
+            success:false,
+            message:'Error al obtener al empleado',
+            error:error.message
+        });
+
+    }
+}
+
 module.exports = {
     crearEmpleado,
-    obtenerEmpleados
+    obtenerEmpleados,
+    moverArchivos,
+    obetenerEmpleadoPorId,
+    empleadoActualizadoPorId,
+    bajaEmpleadoPorId
 };
