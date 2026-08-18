@@ -57,44 +57,67 @@ const crearOrdenProduccion = async (req, res) => {
     }
 }
 
-const crearProceso = async (req, res)=> {
-    try{
+const crearProceso = async (req, res) => {
+    try {
         const {
             nombre_operacion,
             tipo_proceso,
             id_maquina,
             tiempo_estimado,
-            notas
+            notas,
+            id_orden,
+            numero_paso  // ← Agrega esto
         } = req.body;
 
-        const query = `INSERT INTO proceso (nombre_operacion, tipo_proceso,id_maquina, tiempo_estimado, notas) VALUES ($1, $2, $3, $4, $5) RETURNING *`;
+        // Iniciar transacción
+        await pool.query('BEGIN');
 
-        const values = [
+        // 1. Insertar el proceso
+        const queryProceso = `INSERT INTO proceso (nombre_operacion, tipo_proceso, id_maquina, tiempo_estimado, notas) 
+                              VALUES ($1, $2, $3, $4, $5) RETURNING *`;
+        
+        const valuesProceso = [
             nombre_operacion.trim(),
             tipo_proceso.trim(),
             id_maquina || null,
             tiempo_estimado || null,
             notas ? notas.trim() : null
-        ]
+        ];
 
-        const result = await pool.query(query, values); 
-        const nuevoProceso = result.rows[0];
+        const resultProceso = await pool.query(queryProceso, valuesProceso);
+        const nuevoProceso = resultProceso.rows[0];
 
-         res.status(201).json({
+        // 2. Crear la relación en orden_proceso
+        const queryRelacion = `INSERT INTO orden_proceso (id_ordenproduccion, id_proceso, numero_paso) 
+                               VALUES ($1, $2, $3)`;
+        
+        await pool.query(queryRelacion, [
+            id_orden,
+            nuevoProceso.id_proceso,
+            numero_paso || 1  // Si no se envía, por defecto 1
+        ]);
+
+        // Confirmar transacción
+        await pool.query('COMMIT');
+
+        res.status(201).json({
             success: true,
-            message: 'orden creada exitosamente',
+            message: 'Proceso creado y asociado a la orden exitosamente',
             data: nuevoProceso
         });
 
-    }catch(error){
+    } catch (error) {
+        // Rollback en caso de error
+        await pool.query('ROLLBACK');
+        
         console.error('Error al crear proceso:', error);
-
         res.status(500).json({
-            message:'Error al crear el proceso',
-            error:error.message
+            success: false,
+            message: 'Error al crear el proceso',
+            error: error.message
         });
     }
-}
+};
 
 const crearOrdenProceso = async (req, res)=>{
     try{
@@ -137,12 +160,37 @@ const crearOrdenProceso = async (req, res)=>{
 
 const obtenerProcesos = async (req, res) => {
     try {
+        const { id_Orden } = req.params;  // Recibir el ID de la orden
 
         const query = `
-            SELECT *
-            FROM proceso
-            ORDER BY id_proceso ASC
+            SELECT p.*, op.numero_paso
+            FROM proceso p
+            INNER JOIN orden_proceso op ON p.id_proceso = op.id_proceso
+            WHERE op.id_ordenproduccion = $1
+            ORDER BY op.numero_paso ASC
         `;
+
+        const result = await pool.query(query, [id_Orden]);
+
+        res.status(200).json({
+            success: true,
+            data: result.rows
+        });
+
+    } catch (error) {
+        console.error('Error al obtener procesos:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error al obtener los procesos',
+            error: error.message
+        });
+    }
+};
+
+const obtenerOrdenProduccion = async (req, res) =>{
+    try{
+
+        const query = `select id_orden, id_material, producto, cliente, cantidad, fecha_inicio, fecha_entrega, prioridad, numero_plano, lote, material, grado_material, notas from orden_produccion ORDER BY id_orden ASC`
 
         const result = await pool.query(query);
 
@@ -151,17 +199,48 @@ const obtenerProcesos = async (req, res) => {
             data: result.rows
         });
 
-    } catch (error) {
 
-        console.error('Error al obtener procesos:', error);
+    }catch(error){
+         console.error('Error al obtener procesos:', error);
 
         res.status(500).json({
             success: false,
-            message: 'Error al obtener los procesos',
+            message: 'Error al obtener las ordenes',
             error: error.message
         });
     }
-};
+}
+
+const obtenerOrdenProduccionid = async (req, res)=>{
+     try{
+            const { id } = req.params;
+
+            const query = `SELECT id_orden, producto, cliente, cantidad, fecha_entrega FROM orden_produccion WHERE id_orden = $1`;
+
+            const result = await pool.query(query,[id]);
+            const orden = result.rows[0];
+
+        if(!orden){
+            return res.status(404).json({
+                success:false,
+                message:`no se encontro la maquina con el ID: ${id}`
+            });
+        }
+
+        res.status(200).json({
+            success:true,
+            data:orden
+        })
+     }catch(error){
+        console.error('Error al obtener maquina por ID', error);
+
+        res.status(500).json({
+            success:false,
+            message:'Error al obtener la maquina',
+            error:error.message
+        });
+     }
+}
 
 const obtenerProcesosOrden = async (req, res) => {
     try {
@@ -824,5 +903,7 @@ module.exports ={
     terminarEjecucion,
     registrarProduccion,
     registrarScrap,
-    obtenerEjecucion
+    obtenerEjecucion,
+    obtenerOrdenProduccion,
+    obtenerOrdenProduccionid
 }

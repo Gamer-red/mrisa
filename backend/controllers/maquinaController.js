@@ -78,7 +78,7 @@ const obtenerMaquina = async (req,res) => {
     }
 }
 
-const obteberNaquinaPorId = async (req, res) =>{
+const obteberMaquinaPorId = async (req, res) =>{
     try{
         const { id } = req.params;
 
@@ -201,7 +201,7 @@ const eliminarMaquinaPorId= async (req, res) => {
 module.exports = {
     crearMaquina,
     obtenerMaquina,
-    obteberNaquinaPorId,
+    obteberMaquinaPorId,
     maquinaActualizada,
     eliminarMaquinaPorId
 };

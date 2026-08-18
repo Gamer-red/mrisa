@@ -1,5 +1,5 @@
 import React from 'react';
-import ConfiguracionForm from './components/configuracionform';
+import ConfiguracionForm from './components/VistaOperadorform';
 
 function OperadorDashboard() {
   return (

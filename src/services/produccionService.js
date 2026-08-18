@@ -18,7 +18,7 @@ export const crearOrdenProduccion = async (formData) => {
         console.log('Datos a enviar:', formData);
 
         // 5. Hacer la petición fetch
-        const response = await fetch(`${API_URL}/orden`, {
+        const response = await fetch(`${API_URL}/produccion/orden`, {
             method: 'POST',                    // Método HTTP
             headers: {
                 'Content-Type': 'application/json'//,  // Tipo de dato que envías
@@ -42,6 +42,131 @@ export const crearOrdenProduccion = async (formData) => {
     } catch (error) {
         // 9. Capturar y relanzar el error para manejarlo en el componente
         console.error('Error en crearOrdenProduccion:', error);
+        throw error;
+    }
+};
+
+// Obtener una orden por ID
+export const obtenerOrdenPorId = async (id) => {
+    try {
+        //const token = localStorage.getItem('token');
+        
+        //if (!token) {
+           // throw new Error('No hay sesión activa. Inicia sesión nuevamente.');
+        //}
+
+        const response = await fetch(`http://localhost:5000/api/produccion/${id}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'//,
+                //'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Error al obtener la orden');
+        }
+
+        return data;
+
+    } catch (error) {
+        console.error('Error en obtenerOrdenPorId:', error);
+        throw error;
+    }
+};
+
+// Obtener todas las máquinas
+export const obtenerMaquinas = async () => {
+    try {
+        //const token = localStorage.getItem('token');
+        
+        //if (!token) {
+           // throw new Error('No hay sesión activa. Inicia sesión nuevamente.');
+        //}
+
+        const response = await fetch('http://localhost:5000/api/maquinas', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'//,
+                //'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Error al obtener las máquinas');
+        }
+
+        return data;
+
+    } catch (error) {
+        console.error('Error en obtenerMaquinas:', error);
+        throw error;
+    }
+};
+
+// Crear un nuevo proceso
+export const crearProceso = async (datosProceso) => {
+    try {
+        const token = localStorage.getItem('token');
+        
+        //if (!token) {
+           // throw new Error('No hay sesión activa. Inicia sesión nuevamente.');
+        //}
+
+        const response = await fetch('http://localhost:5000/api/produccion/proceso', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'//,
+                //'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(datosProceso)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Error al crear el proceso');
+        }
+
+        return data;
+
+    } catch (error) {
+        console.error('Error en crearProceso:', error);
+        throw error;
+    }
+};
+
+// Obtener todos los procesos
+export const obtenerProcesos = async (id_Orden) => {
+    try {
+        //const token = localStorage.getItem('token');
+        
+        //if (!token) {
+         //   throw new Error('No hay sesión activa. Inicia sesión nuevamente.');
+        //}
+
+        const response = await fetch(`http://localhost:5000/api/produccion/proceso/${id_Orden}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'//,
+                //'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Error al obtener los procesos');
+        }
+
+        return data;
+
+    } catch (error) {
+        console.error('Error en obtenerProcesos:', error);
         throw error;
     }
 };
