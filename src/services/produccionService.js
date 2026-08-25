@@ -1,7 +1,7 @@
 // services/ordenProduccionService.js
 
 // 1. URL base de tu API
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'http://localhost:5000/api/produccion';
 
 // 2. Función principal que crea la orden
 export const crearOrdenProduccion = async (formData) => {
@@ -167,6 +167,286 @@ export const obtenerProcesos = async (id_Orden) => {
 
     } catch (error) {
         console.error('Error en obtenerProcesos:', error);
+        throw error;
+    }
+};
+
+export const obtenerOrdenesOperador = async () => {
+    try {
+        // Obtener token del localStorage
+        //const token = localStorage.getItem('token');
+        
+        //if (!token) {
+          //  throw new Error('No hay sesión activa. Inicia sesión nuevamente.');
+        //}
+
+        // Hacer la petición GET al endpoint
+        const response = await fetch(`${API_URL}/operador/ordenes`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'//,
+                //'Authorization': `Bearer ${token}`
+            }
+        });
+
+        // Convertir respuesta a JSON
+        const data = await response.json();
+
+        // Verificar si la respuesta fue exitosa
+        if (!response.ok) {
+            throw new Error(data.message || 'Error al obtener las órdenes disponibles');
+        }
+
+        // Retornar los datos
+        return data;
+
+    } catch (error) {
+        console.error('Error en obtenerOrdenesOperador:', error);
+        throw error;
+    }
+};
+
+export const obtenerEmpleados = async () => {
+    try {
+        //const token = localStorage.getItem('token');
+        
+        //if (!token) {
+          //  throw new Error('No hay sesión activa. Inicia sesión nuevamente.');
+        //}
+
+        const response = await fetch(`${API_URL}/empleados-operador`, {  // ← Cambia a /empleados-operador
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'//,
+                //'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Error al obtener los empleados');
+        }
+
+        return data;
+
+    } catch (error) {
+        console.error('Error en obtenerEmpleados:', error);
+        throw error;
+    }
+};
+
+export const obtenerProcesosDisponibles = async (idOrden) => {
+    try {
+        //const token = localStorage.getItem('token');
+        
+        //if (!token) {
+            //throw new Error('No hay sesión activa. Inicia sesión nuevamente.');
+       // }
+
+        const response = await fetch(`${API_URL}/operador/procesos/${idOrden}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'//,
+                //'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Error al obtener los procesos disponibles');
+        }
+
+        return data;
+
+    } catch (error) {
+        console.error('Error en obtenerProcesosDisponibles:', error);
+        throw error;
+    }
+};
+
+export const iniciarEjecucion = async (datos) => {
+    try {
+        //const token = localStorage.getItem('token');
+        
+        //if (!token) {
+            //throw new Error('No hay sesión activa. Inicia sesión nuevamente.');
+        //}
+
+        const response = await fetch(`${API_URL}/operador/iniciar`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'//,
+                //'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(datos)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Error al iniciar la ejecución');
+        }
+
+        return data;
+
+    } catch (error) {
+        console.error('Error en iniciarEjecucion:', error);
+        throw error;
+    }
+};
+
+export const registrarProduccion = async (datos) => {
+    try {
+        //const token = localStorage.getItem('token');
+        
+        //if (!token) {
+            //throw new Error('No hay sesión activa. Inicia sesión nuevamente.');
+        //}
+
+        const response = await fetch(`${API_URL}/operador/registrar`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'//,
+                //'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(datos)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Error al registrar la producción');
+        }
+
+        return data;
+
+    } catch (error) {
+        console.error('Error en registrarProduccion:', error);
+        throw error;
+    }
+};
+
+export const pausarEjecucion = async (idEjecucion) => {
+    try {
+        //const token = localStorage.getItem('token');
+        
+        //if (!token) {
+           // throw new Error('No hay sesión activa. Inicia sesión nuevamente.');
+        //}
+
+        const response = await fetch(`${API_URL}/operador/pausar`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'//,
+                //'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ id_ejecucion: idEjecucion })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Error al pausar la ejecución');
+        }
+
+        return data;
+
+    } catch (error) {
+        console.error('Error en pausarEjecucion:', error);
+        throw error;
+    }
+};
+
+export const reanudarEjecucion = async (idEjecucion) => {
+    try {
+        //const token = localStorage.getItem('token');
+        
+        //if (!token) {
+          //  throw new Error('No hay sesión activa. Inicia sesión nuevamente.');
+        //}
+
+        const response = await fetch(`${API_URL}/operador/reanudar`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'//,
+                //'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ id_ejecucion: idEjecucion })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Error al reanudar la ejecución');
+        }
+
+        return data;
+
+    } catch (error) {
+        console.error('Error en reanudarEjecucion:', error);
+        throw error;
+    }
+};
+
+export const terminarEjecucion = async (idEjecucion) => {
+    try {
+       // const token = localStorage.getItem('token');
+        
+        //if (!token) {
+            //throw new Error('No hay sesión activa. Inicia sesión nuevamente.');
+        //}
+
+        const response = await fetch(`${API_URL}/operador/terminar`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'//,
+               // 'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ id_ejecucion: idEjecucion })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Error al terminar la ejecución');
+        }
+
+        return data;
+
+    } catch (error) {
+        console.error('Error en terminarEjecucion:', error);
+        throw error;
+    }
+};
+
+export const obtenerHistorialEjecucion = async (idEjecucion) => {
+    try {
+        //const token = localStorage.getItem('token');
+        
+        //if (!token) {
+          //  throw new Error('No hay sesión activa. Inicia sesión nuevamente.');
+        //}
+
+        const response = await fetch(`${API_URL}/operador/historial/${idEjecucion}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'//,
+               // 'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Error al obtener el historial');
+        }
+
+        return data;
+
+    } catch (error) {
+        console.error('Error en obtenerHistorialEjecucion:', error);
         throw error;
     }
 };
