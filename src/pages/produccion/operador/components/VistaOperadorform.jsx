@@ -22,6 +22,17 @@ function VistaOperador() {
     const [loadingProcesos, setLoadingProcesos] = useState(false);
     const [showModalConfirmacion, setShowModalConfirmacion] = useState(false);
 
+    const [ejecucionActiva, setEjecucionActiva] = useState(false);
+    const [ejecucionPausada, setEjecucionPausada] = useState(false);
+    const [tiempoTranscurrido, setTiempoTranscurrido] = useState(0);
+    const [timerInterval, setTimerInterval] = useState(null);
+    const [totalPiezas, setTotalPiezas] = useState(0);
+    const [totalScrap, setTotalScrap] = useState(0);
+    const [historial, setHistorial] = useState([]);
+
+    const [showModalPiezas, setShowModalPiezas] = useState(false);
+    const [showModalScrap, setShowModalScrap] = useState(false);
+
     // ========== FUNCIONES ==========
     
     // Cargar órdenes disponibles
@@ -79,16 +90,56 @@ function VistaOperador() {
         }
     };
 
+    const formatearTiempo = (segundos) => {
+    const horas = Math.floor(segundos / 3600);
+    const minutos = Math.floor((segundos % 3600) / 60);
+    const segs = segundos % 60;
+    return `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:${String(segs).padStart(2, '0')}`;
+    };
+        // Iniciar timer
+    const iniciarTimer = () => {
+        if (timerInterval) return;
+        
+        const interval = setInterval(() => {
+            setTiempoTranscurrido(prev => prev + 1);
+        }, 1000);
+        
+        setTimerInterval(interval);
+    };
+
+    // Detener timer
+    const detenerTimer = () => {
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            setTimerInterval(null);
+        }
+    };
+
+    // Pausar timer
+    const pausarTimer = () => {
+        detenerTimer();
+    };
+
+    // Reanudar timer
+    const reanudarTimer = () => {
+        if (!timerInterval && ejecucionActiva && !ejecucionPausada) {
+            iniciarTimer();
+        }
+    };
+
+    // Reiniciar timer
+    const reiniciarTimer = () => {
+        detenerTimer();
+        setTiempoTranscurrido(0);
+    };
+
     const handleAbrirConfirmacion = () => {
     if (!ordenSeleccionada || !empleadoSeleccionado || !procesoSeleccionado) {
         alert('Debes seleccionar orden, empleado y proceso');
         return;
     }
     setShowModalConfirmacion(true);
-};
-
-    // ========== useEffect ==========
-    
+    };  
     // Cargar órdenes y empleados al montar el componente
     useEffect(() => {
         cargarOrdenesDisponibles();
@@ -107,7 +158,7 @@ function VistaOperador() {
 
     // ========== RENDER ==========
     return (
-        <div className="p-6 space-y-6">
+        <div className="p-6 space-y-6 max-h-[calc(100vh-80px)] overflow-y-auto">
             {/* Título */}
             <div className="flex items-center justify-between">
                 <div>
@@ -165,6 +216,215 @@ function VistaOperador() {
                         Iniciar Ejecución
                     </button>
                 </div>
+                {ejecucionActiva && (
+                    <div className="bg-gradient-to-b from-slate-800 to-slate-900 rounded-xl border border-green-500/30 p-6">
+                        
+                        {/* Encabezado */}
+                        <div className="flex items-center justify-between mb-6">
+                            <div>
+                                <h2 className="text-xl font-bold text-green-400">⚡ Ejecución en Curso</h2>
+                                <p className="text-sm text-gray-400">
+                                    Orden #{ordenSeleccionada?.id_orden} - {ordenSeleccionada?.producto}
+                                </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className={`px-3 py-1 rounded-full text-xs font-medium ${ejecucionPausada ? 'bg-yellow-500/20 text-yellow-400' : 'bg-green-500/20 text-green-400'}`}>
+                                    {ejecucionPausada ? '⏸ Pausado' : '▶ En ejecución'}
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Contadores */}
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                            <div className="bg-slate-700/30 rounded-lg p-4 border border-slate-700/30 text-center">
+                                <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Objetivo</label>
+                                <p className="text-2xl font-bold text-white">{ordenSeleccionada?.cantidad || 0}</p>
+                                <p className="text-xs text-gray-500">piezas</p>
+                            </div>
+                            <div className="bg-slate-700/30 rounded-lg p-4 border border-slate-700/30 text-center">
+                                <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Producidas</label>
+                                <p className="text-2xl font-bold text-green-400">{totalPiezas}</p>
+                                <p className="text-xs text-gray-500">piezas buenas</p>
+                            </div>
+                            <div className="bg-slate-700/30 rounded-lg p-4 border border-slate-700/30 text-center">
+                                <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Scrap</label>
+                                <p className="text-2xl font-bold text-red-400">{totalScrap}</p>
+                                <p className="text-xs text-gray-500">piezas defectuosas</p>
+                            </div>
+                            <div className="bg-slate-700/30 rounded-lg p-4 border border-slate-700/30 text-center">
+                                <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">⏱ Tiempo</label>
+                                <p className="text-2xl font-bold text-blue-400">{formatearTiempo(tiempoTranscurrido)}</p>
+                                <p className="text-xs text-gray-500">tiempo efectivo</p>
+                            </div>
+                        </div>
+
+                        {/* Sección de Registro de Producción */}
+                        <div className="bg-slate-700/30 rounded-lg p-4 border border-slate-700/30 mb-6">
+                            <h4 className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-3">📦 Registrar Producción del Turno</h4>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        ✅ Piezas buenas <span className="text-red-400">*</span>
+                                    </label>
+                                    <input
+                                        type="number"
+                                        id="piezasInput"
+                                        placeholder="Ej: 10, 20, 50..."
+                                        min="0"
+                                        step="1"
+                                        className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-green-500 transition-colors"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        ❌ Scrap
+                                    </label>
+                                    <input
+                                        type="number"
+                                        id="scrapInput"
+                                        placeholder="Ej: 0, 1, 2..."
+                                        min="0"
+                                        step="1"
+                                        className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-red-500 transition-colors"
+                                    />
+                                    <p className="text-xs text-gray-500 mt-1">Opcional. Registra las piezas defectuosas</p>
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={() => {
+                                    const piezasInput = document.getElementById('piezasInput');
+                                    const scrapInput = document.getElementById('scrapInput');
+                                    
+                                    const piezas = parseInt(piezasInput.value) || 0;
+                                    const scrap = parseInt(scrapInput.value) || 0;
+                                    
+                                    // Validar que haya al menos una pieza o scrap
+                                    if (piezas === 0 && scrap === 0) {
+                                        alert('Debes registrar al menos una pieza o scrap');
+                                        return;
+                                    }
+
+                                    // Registrar producción
+                                    if (piezas > 0) {
+                                        setTotalPiezas(prev => prev + piezas);
+                                    }
+                                    if (scrap > 0) {
+                                        setTotalScrap(prev => prev + scrap);
+                                    }
+
+                                    // Agregar al historial
+                                    setHistorial(prev => [...prev, {
+                                        fecha: new Date().toISOString(),
+                                        piezas: piezas,
+                                        scrap: scrap,
+                                        accion: 'produccion'
+                                    }]);
+
+                                    // Limpiar inputs
+                                    piezasInput.value = '';
+                                    scrapInput.value = '';
+                                }}
+                                className="w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                                Guardar piezas
+                            </button>
+                        </div>
+
+                        {/* Botones de control */}
+                        <div className="flex flex-wrap gap-3">
+                            {!ejecucionPausada ? (
+                                <button
+                                    onClick={() => {
+                                        pausarTimer();
+                                        setEjecucionPausada(true);
+                                        setHistorial(prev => [...prev, {
+                                            fecha: new Date().toISOString(),
+                                            piezas: 0,
+                                            scrap: 0,
+                                            accion: 'pausa'
+                                        }]);
+                                    }}
+                                    className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg font-medium transition-colors shadow-lg shadow-yellow-500/25 flex items-center gap-2"
+                                >
+                                    ⏸ Pausar
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={() => {
+                                        reanudarTimer();
+                                        setEjecucionPausada(false);
+                                        setHistorial(prev => [...prev, {
+                                            fecha: new Date().toISOString(),
+                                            piezas: 0,
+                                            scrap: 0,
+                                            accion: 'reanudacion'
+                                        }]);
+                                    }}
+                                    className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors shadow-lg shadow-blue-500/25 flex items-center gap-2"
+                                >
+                                    ▶ Reanudar
+                                </button>
+                            )}
+
+                            <button
+                                onClick={() => {
+                                    detenerTimer();
+                                    setEjecucionActiva(false);
+                                    setEjecucionPausada(false);
+                                    setHistorial(prev => [...prev, {
+                                        fecha: new Date().toISOString(),
+                                        piezas: 0,
+                                        scrap: 0,
+                                        accion: 'fin'
+                                    }]);
+                                    alert(`✅ Proceso terminado!\n\n📊 Resumen:\nPiezas producidas: ${totalPiezas}\nScrap: ${totalScrap}\nTiempo total: ${formatearTiempo(tiempoTranscurrido)}`);
+                                }}
+                                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors shadow-lg shadow-red-500/25 flex items-center gap-2 ml-auto"
+                            >
+                                🏁 Terminar Proceso
+                            </button>
+                        </div>
+
+                        {/* Historial rápido */}
+                        <div className="mt-6">
+                            <h4 className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-2">📜 Historial</h4>
+                            <div className="max-h-32 overflow-y-auto bg-slate-700/20 rounded-lg p-3">
+                                {historial.length === 0 ? (
+                                    <p className="text-gray-500 text-sm text-center">Sin registros</p>
+                                ) : (
+                                    <div className="space-y-1">
+                                        {historial.slice(-10).map((item, index) => (
+                                            <div key={index} className="flex justify-between text-xs">
+                                                <span className="text-gray-400">{new Date(item.fecha).toLocaleTimeString()}</span>
+                                                <span className="text-white">
+                                                    {item.accion === 'inicio' && '🚀 Inicio'}
+                                                    {item.accion === 'produccion' && (
+                                                        <>
+                                                            {item.piezas > 0 && `✅ ${item.piezas} piezas`}
+                                                            {item.piezas > 0 && item.scrap > 0 && ' | '}
+                                                            {item.scrap > 0 && `❌ ${item.scrap} scrap`}
+                                                        </>
+                                                    )}
+                                                    {item.accion === 'pausa' && '⏸ Pausa'}
+                                                    {item.accion === 'reanudacion' && '▶ Reanudación'}
+                                                    {item.accion === 'fin' && '🏁 Fin'}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+)}
+
+
+                
 
                 {/* Mensaje de validación */}
                 {(!ordenSeleccionada || !empleadoSeleccionado || !procesoSeleccionado) && (
@@ -219,8 +479,27 @@ function VistaOperador() {
                             </button>
                             <button
                                 onClick={() => {
-                                    alert('🚀 Simulación: Ejecución iniciada!\n\n📋 Orden: ' + ordenSeleccionada?.producto + '\n⚙️ Proceso: ' + procesoSeleccionado?.nombre_operacion + '\n👤 Operador: ' + empleadoSeleccionado?.nombre);
+                                    // Cerrar modal
                                     setShowModalConfirmacion(false);
+                                    
+                                    // Activar ejecución
+                                    setEjecucionActiva(true);
+                                    setEjecucionPausada(false);
+                                    setTotalPiezas(0);
+                                    setTotalScrap(0);
+                                    setHistorial([]);
+                                    reiniciarTimer();
+                                    iniciarTimer();
+                                    
+                                    // Agregar registro inicial al historial
+                                    setHistorial([
+                                        {
+                                            fecha: new Date().toISOString(),
+                                            piezas: 0,
+                                            scrap: 0,
+                                            accion: 'inicio'
+                                        }
+                                    ]);
                                 }}
                                 className="flex-1 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium transition-colors shadow-lg shadow-green-500/25"
                             >
