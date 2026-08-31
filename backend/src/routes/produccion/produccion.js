@@ -23,8 +23,6 @@ router.get('/operador/ordenes', obtenerOrdenesOperador);
 
 router.get('/operador/procesos/:idOrden', obtenerProcesosDisponibles);
 
-
-
 router.post('/operador/registrar', registrarProduccion);
 
 router.post('/operador/pausar', pausarEjecucion);

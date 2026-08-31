@@ -4,7 +4,10 @@ import {
     obtenerEmpleados,
     obtenerProcesosDisponibles,
     iniciarEjecucion,
-    registrarProduccion
+    registrarProduccion,
+    pausarEjecucion,
+    reanudarEjecucion,
+    terminarEjecucion
 } from '../../../../services/produccionService';
 import SelectorOrden from '../components/SelectorOrden';
 import SelectorEmpleado from '../components/SelectorEmpleado';
@@ -364,56 +367,104 @@ function VistaOperador() {
                         {/* Botones de control */}
                         <div className="flex flex-wrap gap-3">
                             {!ejecucionPausada ? (
-                                <button
-                                    onClick={() => {
-                                        pausarTimer();
-                                        setEjecucionPausada(true);
-                                        setHistorial(prev => [...prev, {
-                                            fecha: new Date().toISOString(),
-                                            piezas: 0,
-                                            scrap: 0,
-                                            accion: 'pausa'
-                                        }]);
-                                    }}
-                                    className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg font-medium transition-colors shadow-lg shadow-yellow-500/25 flex items-center gap-2"
-                                >
-                                    ⏸ Pausar
-                                </button>
+                               <button
+                                onClick={async () => {
+                                    try {
+                                        // 1. Guardar en la base de datos
+                                        const response = await pausarEjecucion(idEjecucion);
+                                        
+                                        if (response.success) {
+                                            // 2. Actualizar el frontend
+                                            pausarTimer();
+                                            setEjecucionPausada(true);
+                                            
+                                            // 3. Agregar al historial
+                                            setHistorial(prev => [...prev, {
+                                                fecha: new Date().toISOString(),
+                                                piezas: 0,
+                                                scrap: 0,
+                                                accion: 'pausa'
+                                            }]);
+                                            
+                                            console.log('✅ Ejecución pausada en la base de datos');
+                                        }
+                                    } catch (error) {
+                                        console.error('❌ Error al pausar:', error);
+                                        alert(error.message || 'Error al pausar la ejecución');
+                                    }
+                                }}
+                                className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg font-medium transition-colors shadow-lg shadow-yellow-500/25 flex items-center gap-2"
+                            >
+                                ⏸ Pausar
+                            </button>
                             ) : (
                                 <button
-                                    onClick={() => {
-                                        reanudarTimer();
-                                        setEjecucionPausada(false);
-                                        setHistorial(prev => [...prev, {
-                                            fecha: new Date().toISOString(),
-                                            piezas: 0,
-                                            scrap: 0,
-                                            accion: 'reanudacion'
-                                        }]);
-                                    }}
-                                    className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors shadow-lg shadow-blue-500/25 flex items-center gap-2"
-                                >
-                                    ▶ Reanudar
-                                </button>
+                                onClick={async () => {
+                                    try {
+                                        // 1. Guardar en la base de datos
+                                        const response = await reanudarEjecucion(idEjecucion);
+                                        
+                                        if (response.success) {
+                                            // 2. Actualizar el frontend
+                                            reanudarTimer();
+                                            setEjecucionPausada(false);
+                                            
+                                            // 3. Agregar al historial
+                                            setHistorial(prev => [...prev, {
+                                                fecha: new Date().toISOString(),
+                                                piezas: 0,
+                                                scrap: 0,
+                                                accion: 'reanudacion'
+                                            }]);
+                                            
+                                            console.log('✅ Ejecución reanudada en la base de datos');
+                                        }
+                                    } catch (error) {
+                                        console.error('❌ Error al reanudar:', error);
+                                        alert(error.message || 'Error al reanudar la ejecución');
+                                    }
+                                }}
+                                className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors shadow-lg shadow-blue-500/25 flex items-center gap-2"
+                            >
+                                ▶ Reanudar
+                            </button>
                             )}
 
                             <button
-                                onClick={() => {
-                                    detenerTimer();
-                                    setEjecucionActiva(false);
-                                    setEjecucionPausada(false);
-                                    setHistorial(prev => [...prev, {
-                                        fecha: new Date().toISOString(),
-                                        piezas: 0,
-                                        scrap: 0,
-                                        accion: 'fin'
-                                    }]);
-                                    alert(`✅ Proceso terminado!\n\n📊 Resumen:\nPiezas producidas: ${totalPiezas}\nScrap: ${totalScrap}\nTiempo total: ${formatearTiempo(tiempoTranscurrido)}`);
-                                }}
-                                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors shadow-lg shadow-red-500/25 flex items-center gap-2 ml-auto"
-                            >
-                                🏁 Terminar Proceso
-                            </button>
+                            onClick={async () => {
+                                try {
+                                    // 1. Guardar en la base de datos
+                                    const response = await terminarEjecucion(idEjecucion);
+                                    
+                                    if (response.success) {
+                                        // 2. Actualizar el frontend
+                                        detenerTimer();
+                                        setEjecucionActiva(false);
+                                        setEjecucionPausada(false);
+                                        
+                                        // 3. Agregar al historial
+                                        setHistorial(prev => [...prev, {
+                                            fecha: new Date().toISOString(),
+                                            piezas: 0,
+                                            scrap: 0,
+                                            accion: 'fin'
+                                        }]);
+                                        
+                                        // 4. Mostrar resumen
+                                        const resumen = response.data.resumen;
+                                        alert(`✅ Proceso terminado!\n\n📊 Resumen:\nPiezas producidas: ${resumen.total_piezas}\nScrap: ${resumen.total_scrap}\nTiempo total: ${resumen.tiempo_total}`);
+                                        
+                                        console.log('✅ Ejecución terminada en la base de datos');
+                                    }
+                                } catch (error) {
+                                    console.error('❌ Error al terminar:', error);
+                                    alert(error.message || 'Error al terminar la ejecución');
+                                }
+                            }}
+                            className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors shadow-lg shadow-red-500/25 flex items-center gap-2 ml-auto"
+                        >
+                            🏁 Terminar Proceso
+                        </button>
                         </div>
 
                         {/* Historial rápido */}
@@ -447,11 +498,7 @@ function VistaOperador() {
                             </div>
                         </div>
                     </div>
-)}
-
-
-                
-
+                )}
                 {/* Mensaje de validación */}
                 {(!ordenSeleccionada || !empleadoSeleccionado || !procesoSeleccionado) && (
                     <p className="text-yellow-400 text-sm mt-3 text-center">

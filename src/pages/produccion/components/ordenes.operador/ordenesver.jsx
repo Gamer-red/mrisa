@@ -60,8 +60,6 @@ function ModalVerOrden({ orden, onClose }) {
     setShowModalProceso(false);
   };
 
-  // ... (el resto del código del modal)
-
   // Mostrar loading
   if (loading) {
     return (

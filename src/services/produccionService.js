@@ -149,7 +149,7 @@ export const obtenerProcesos = async (id_Orden) => {
          //   throw new Error('No hay sesión activa. Inicia sesión nuevamente.');
         //}
 
-        const response = await fetch(`http://localhost:5000/api/produccion/proceso/${id_Orden}`, {
+        const response = await fetch(`http://localhost:5000/api/produccion/orden/${id_Orden}/procesos`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'//,
