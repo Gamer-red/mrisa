@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { 
     obtenerOrdenesOperador, 
     obtenerEmpleados,
-    obtenerProcesosDisponibles
+    obtenerProcesosDisponibles,
+    iniciarEjecucion,
+    registrarProduccion
 } from '../../../../services/produccionService';
 import SelectorOrden from '../components/SelectorOrden';
 import SelectorEmpleado from '../components/SelectorEmpleado';
@@ -26,6 +28,7 @@ function VistaOperador() {
     const [ejecucionPausada, setEjecucionPausada] = useState(false);
     const [tiempoTranscurrido, setTiempoTranscurrido] = useState(0);
     const [timerInterval, setTimerInterval] = useState(null);
+    const [idEjecucion, setIdEjecucion] = useState(null);
     const [totalPiezas, setTotalPiezas] = useState(0);
     const [totalScrap, setTotalScrap] = useState(0);
     const [historial, setHistorial] = useState([]);
@@ -293,7 +296,7 @@ function VistaOperador() {
                             </div>
 
                             <button
-                                onClick={() => {
+                                onClick={async () => {
                                     const piezasInput = document.getElementById('piezasInput');
                                     const scrapInput = document.getElementById('scrapInput');
                                     
@@ -306,25 +309,48 @@ function VistaOperador() {
                                         return;
                                     }
 
-                                    // Registrar producción
-                                    if (piezas > 0) {
-                                        setTotalPiezas(prev => prev + piezas);
-                                    }
-                                    if (scrap > 0) {
-                                        setTotalScrap(prev => prev + scrap);
+                                    // Validar que no exceda el objetivo
+                                    const objetivo = ordenSeleccionada?.cantidad || 0;
+                                    if (totalPiezas + piezas > objetivo) {
+                                        alert(`No puedes superar el objetivo de ${objetivo} piezas`);
+                                        return;
                                     }
 
-                                    // Agregar al historial
-                                    setHistorial(prev => [...prev, {
-                                        fecha: new Date().toISOString(),
-                                        piezas: piezas,
-                                        scrap: scrap,
-                                        accion: 'produccion'
-                                    }]);
+                                    try {
+                                        // 1. Guardar en la base de datos
+                                        const response = await registrarProduccion({
+                                            id_ejecucion: idEjecucion,
+                                            piezas: piezas,
+                                            scrap: scrap
+                                        });
 
-                                    // Limpiar inputs
-                                    piezasInput.value = '';
-                                    scrapInput.value = '';
+                                        if (response.success) {
+                                            // 2. Actualizar el frontend
+                                            if (piezas > 0) {
+                                                setTotalPiezas(prev => prev + piezas);
+                                            }
+                                            if (scrap > 0) {
+                                                setTotalScrap(prev => prev + scrap);
+                                            }
+
+                                            // 3. Agregar al historial
+                                            setHistorial(prev => [...prev, {
+                                                fecha: new Date().toISOString(),
+                                                piezas: piezas,
+                                                scrap: scrap,
+                                                accion: 'produccion'
+                                            }]);
+
+                                            // 4. Limpiar inputs
+                                            piezasInput.value = '';
+                                            scrapInput.value = '';
+
+                                            console.log('✅ Producción registrada en la base de datos');
+                                        }
+                                    } catch (error) {
+                                        console.error('❌ Error al registrar producción:', error);
+                                        alert(error.message || 'Error al registrar la producción');
+                                    }
                                 }}
                                 className="w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2"
                             >
@@ -478,29 +504,51 @@ function VistaOperador() {
                                 Cancelar
                             </button>
                             <button
-                                onClick={() => {
-                                    // Cerrar modal
-                                    setShowModalConfirmacion(false);
-                                    
-                                    // Activar ejecución
-                                    setEjecucionActiva(true);
-                                    setEjecucionPausada(false);
-                                    setTotalPiezas(0);
-                                    setTotalScrap(0);
-                                    setHistorial([]);
-                                    reiniciarTimer();
-                                    iniciarTimer();
-                                    
-                                    // Agregar registro inicial al historial
-                                    setHistorial([
-                                        {
-                                            fecha: new Date().toISOString(),
-                                            piezas: 0,
-                                            scrap: 0,
-                                            accion: 'inicio'
+                                onClick={async () => {
+                                     console.log('🟢 Botón clickeado - iniciarEjecucion importada');
+                                    try {
+                                        setShowModalConfirmacion(false);
+                                        
+                                        const datos = {
+                                            id_orden: ordenSeleccionada.id_orden,
+                                            id_proceso: procesoSeleccionado.id_proceso,
+                                            id_empleado: empleadoSeleccionado.id_empleado
+                                        };
+                                        
+                                        console.log('📤 Enviando datos:', datos);
+                                        
+                                        const response = await iniciarEjecucion(datos);
+                                        
+                                        console.log('📥 Respuesta del backend:', response);
+                                        console.log('📥 Tipo de respuesta:', typeof response);
+                                        console.log('📥 Response success:', response?.success);
+                                        
+                                        if (response && response.success) {
+                                            console.log('✅ Ejecución exitosa, ID:', response.data.id_ejecucion);
+                                                                                 
+                                            setIdEjecucion(response.data.id_ejecucion);                                       
+                                            setEjecucionActiva(true);
+                                            setEjecucionPausada(false);
+                                            setTotalPiezas(0);
+                                            setTotalScrap(0);
+                                            setHistorial([]);
+                                            reiniciarTimer();
+                                            iniciarTimer();
+                                            
+                                            setHistorial([{
+                                                fecha: new Date().toISOString(),
+                                                piezas: 0,
+                                                scrap: 0,
+                                                accion: 'inicio'
+                                            }]);
+                                        }else {
+                                            console.log('⚠️ Respuesta sin éxito:', response);
                                         }
-                                    ]);
+                                    } catch (error) {
+                                        console.error('❌ Error:', error);
+                                    }
                                 }}
+
                                 className="flex-1 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium transition-colors shadow-lg shadow-green-500/25"
                             >
                                 Confirmar Inicio
