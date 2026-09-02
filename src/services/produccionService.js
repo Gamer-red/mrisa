@@ -450,3 +450,33 @@ export const obtenerHistorialEjecucion = async (idEjecucion) => {
         throw error;
     }
 };
+
+export const obtenerHistorialOrden = async (idOrden) => {
+    try {
+        //const token = localStorage.getItem('token');
+        
+        //if (!token) {
+            //throw new Error('No hay sesión activa. Inicia sesión nuevamente.');
+        //}
+
+        const response = await fetch(`${API_URL}/orden/${idOrden}/historial`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'//,
+                //'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Error al obtener el historial');
+        }
+
+        return data;
+
+    } catch (error) {
+        console.error('Error en obtenerHistorialOrden:', error);
+        throw error;
+    }
+};

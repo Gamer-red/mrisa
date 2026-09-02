@@ -959,6 +959,7 @@ const obtenerHistorialEjecucion = async (req, res) => {
         });
     }
 };
+
 const obtenerEmpleadosOperador = async (req, res) => {
     try {
         const query = `
@@ -999,6 +1000,71 @@ const obtenerEmpleadosOperador = async (req, res) => {
     }
 };
 
+// Obtener historial completo de una orden
+const obtenerHistorialOrden = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const query = `
+            SELECT 
+                e.id_ejecucion,
+                e.id_empleado,
+                e.estado as estado_ejecucion,
+                e.fecha_inicio,
+                e.fecha_fin,
+                emp.nombre as nombre_empleado,
+                p.nombre_operacion as nombre_proceso,
+                dp.cantidad,
+                dp.tipo,
+                dp.fecha as fecha_produccion
+            FROM ejecucion_proceso e
+            INNER JOIN proceso p ON e.id_proceso = p.id_proceso
+            INNER JOIN empleados emp ON e.id_empleado = emp.id_empleado
+            LEFT JOIN detalle_produccion dp ON e.id_ejecucion = dp.id_ejecucion
+            WHERE e.id_ordenproduccion = $1
+            ORDER BY e.fecha_inicio DESC, dp.fecha ASC
+        `;
+
+        const result = await pool.query(query, [id]);
+
+        // Agrupar por ejecución
+        const ejecuciones = {};
+        result.rows.forEach(row => {
+            if (!ejecuciones[row.id_ejecucion]) {
+                ejecuciones[row.id_ejecucion] = {
+                    id_ejecucion: row.id_ejecucion,
+                    nombre_empleado: row.nombre_empleado,
+                    nombre_proceso: row.nombre_proceso,
+                    estado: row.estado_ejecucion,
+                    fecha_inicio: row.fecha_inicio,
+                    fecha_fin: row.fecha_fin,
+                    produccion: []
+                };
+            }
+            if (row.cantidad !== null) {
+                ejecuciones[row.id_ejecucion].produccion.push({
+                    cantidad: row.cantidad,
+                    tipo: row.tipo,
+                    fecha: row.fecha_produccion
+                });
+            }
+        });
+
+        res.status(200).json({
+            success: true,
+            data: Object.values(ejecuciones)
+        });
+
+    } catch (error) {
+        console.error('Error al obtener historial de orden:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error al obtener el historial de la orden',
+            error: error.message
+        });
+    }
+};
+
 module.exports ={
     crearOrdenProduccion,
     crearProceso,
@@ -1014,6 +1080,7 @@ module.exports ={
     reanudarEjecucion,
     terminarEjecucion,
     obtenerHistorialEjecucion,
-    obtenerEmpleadosOperador
+    obtenerEmpleadosOperador,
+    obtenerHistorialOrden
 
 }

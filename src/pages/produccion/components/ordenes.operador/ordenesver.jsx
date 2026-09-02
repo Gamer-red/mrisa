@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { obtenerOrdenPorId, obtenerProcesos } from '../../../../services/produccionService';
+import { obtenerOrdenPorId, obtenerProcesos,obtenerHistorialOrden } from '../../../../services/produccionService';
 import ModalAgregarProceso from './ordenesagregarproceso';
 
 function ModalVerOrden({ orden, onClose }) {
   const [showModalProceso, setShowModalProceso] = useState(false);
+  const [historialProduccion, setHistorialProduccion] = useState([]);
+  const [loadingHistorial, setLoadingHistorial] = useState(false);
   const [ordenDetalle, setOrdenDetalle] = useState(null);
   const [procesos, setProcesos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -44,13 +46,43 @@ function ModalVerOrden({ orden, onClose }) {
     } finally {
         setLoadingProcesos(false);
     }
+  };
+
+  const cargarHistorialProduccion = async () => {
+    try {
+        setLoadingHistorial(true);
+        const data = await obtenerHistorialOrden(orden.id_orden);
+        
+        if (data.success) {
+            // Transformar los datos para la tabla
+            const registros = [];
+            data.data.forEach(ejecucion => {
+                ejecucion.produccion.forEach(item => {
+                    registros.push({
+                        fecha: item.fecha,
+                        operador: ejecucion.nombre_empleado,
+                        proceso: ejecucion.nombre_proceso,
+                        piezas: item.tipo === 'BUENA' ? item.cantidad : 0,
+                        scrap: item.tipo === 'SCRAP' ? item.cantidad : 0
+                    });
+                });
+            });
+            setHistorialProduccion(registros);
+        }
+    } catch (error) {
+        console.error('Error al cargar historial:', error);
+    } finally {
+        setLoadingHistorial(false);
+    }
 };
+
 
   // Cargar datos cuando se abre el modal
   useEffect(() => {
     if (orden?.id_orden) {
       obtenerDetalleOrden();
       cargarProcesos();
+      cargarHistorialProduccion();
     }
   }, [orden]);
 
@@ -272,15 +304,44 @@ function ModalVerOrden({ orden, onClose }) {
                     <th className="text-left py-2 px-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Máquina</th>
                     <th className="text-left py-2 px-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Piezas</th>
                     <th className="text-left py-2 px-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Scrap</th>
-                    <th className="text-left py-2 px-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Acciones</th>
+                    
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-700/30">
-                  <tr>
-                    <td colSpan="6" className="text-center py-4 text-gray-400">
-                      No hay registros de producción
-                    </td>
-                  </tr>
+                    {loadingHistorial ? (
+                        <tr>
+                            <td colSpan="6" className="text-center py-4 text-gray-400">
+                                Cargando historial...
+                            </td>
+                        </tr>
+                    ) : historialProduccion.length === 0 ? (
+                        <tr>
+                            <td colSpan="6" className="text-center py-4 text-gray-400">
+                                No hay registros de producción
+                            </td>
+                        </tr>
+                    ) : (
+                        historialProduccion.map((registro, index) => (
+                            <tr key={index} className="hover:bg-slate-700/20 transition-colors">
+                                <td className="py-2 px-3 text-sm text-white">
+                                    {new Date(registro.fecha).toLocaleString()}
+                                </td>
+                                <td className="py-2 px-3 text-sm text-gray-300">
+                                    {registro.operador}
+                                </td>
+                                <td className="py-2 px-3 text-sm text-gray-300">
+                                    {registro.proceso}
+                                </td>
+                                <td className="py-2 px-3 text-sm text-green-400 font-medium">
+                                    {registro.piezas}
+                                </td>
+                                <td className="py-2 px-3 text-sm text-red-400 font-medium">
+                                    {registro.scrap}
+                                </td>
+                                
+                            </tr>
+                        ))
+                    )}
                 </tbody>
               </table>
             </div>
