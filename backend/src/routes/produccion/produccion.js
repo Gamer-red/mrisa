@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { crearOrdenProduccion, crearProceso, crearOrdenProceso, obtenerProcesosOrden, obtenerOrdenProduccion, obtenerOrdenProduccionid,obtenerOrdenesOperador,obtenerProcesosDisponibles,
-iniciarEjecucion,registrarProduccion,pausarEjecucion,reanudarEjecucion,terminarEjecucion,obtenerHistorialEjecucion, obtenerEmpleadosOperador,obtenerHistorialOrden } = require('../../../controllers/produccionController');
+iniciarEjecucion,registrarProduccion,pausarEjecucion,reanudarEjecucion,terminarEjecucion,obtenerHistorialEjecucion, obtenerEmpleadosOperador,obtenerHistorialOrden,cambiarEstadoOrden } = require('../../../controllers/produccionController');
 
 router.post('/orden', crearOrdenProduccion);
 
@@ -14,6 +14,8 @@ router.post('/operador/iniciar', iniciarEjecucion);
 router.post('/proceso', crearProceso);
 
 router.post('/orden-proceso', crearOrdenProceso);
+
+router.patch('/orden/:id/estado', cambiarEstadoOrden);
 
 router.get('/orden/:id/procesos', obtenerProcesosOrden);
 

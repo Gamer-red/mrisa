@@ -18,7 +18,7 @@ export const crearOrdenProduccion = async (formData) => {
         console.log('Datos a enviar:', formData);
 
         // 5. Hacer la petición fetch
-        const response = await fetch(`${API_URL}/produccion/orden`, {
+        const response = await fetch(`${API_URL}/orden`, {
             method: 'POST',                    // Método HTTP
             headers: {
                 'Content-Type': 'application/json'//,  // Tipo de dato que envías
@@ -76,6 +76,37 @@ export const obtenerOrdenPorId = async (id) => {
         throw error;
     }
 };
+
+export const cambiarEstadoOrden = async (id_Orden,estado)=>{
+    try {
+        //const token = localStorage.getItem('token');
+        
+        //if (!token) {
+          //  throw new Error('No hay sesión activa. //Inicia sesión nuevamente.');
+        //}
+
+        const response = await fetch(`${API_URL}/orden/${id_Orden}/estado`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'//,
+                //'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ estado })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Error al cambiar el estado');
+        }
+
+        return data;
+
+    } catch (error) {
+        console.error('Error en cambiarEstadoOrden:', error);
+        throw error;
+    }
+}
 
 // Obtener todas las máquinas
 export const obtenerMaquinas = async () => {

@@ -46,21 +46,22 @@ function OrdenesLista() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Fecha Inicio</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Fecha Entrega</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Acciones</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Estado</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-700/50">
+           <tbody className="divide-y divide-slate-700/50">
               {ordenes.length === 0 ? (
                 <tr>
-                  <td colSpan="8" className="px-6 py-4 text-center text-gray-400">
+                  <td colSpan="9" className="px-6 py-4 text-center text-gray-400">
                     No hay órdenes registradas
                   </td>
                 </tr>
               ) : (
                 ordenes.map((orden) => (
-                  <OrdenesItems 
-                    key={orden.id_orden} 
-                    orden={orden} 
-                    onVerClick={() => setOrdenSeleccionada(orden)} 
+                  <OrdenesItems
+                    key={orden.id_orden}
+                    orden={orden}
+                    onVerClick={() => setOrdenSeleccionada(orden)}
                   />
                 ))
               )}

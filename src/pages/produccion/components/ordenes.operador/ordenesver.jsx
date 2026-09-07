@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { obtenerOrdenPorId, obtenerProcesos,obtenerHistorialOrden } from '../../../../services/produccionService';
+import { obtenerOrdenPorId, obtenerProcesos,obtenerHistorialOrden,cambiarEstadoOrden } from '../../../../services/produccionService';
 import ModalAgregarProceso from './ordenesagregarproceso';
 
 function ModalVerOrden({ orden, onClose }) {
@@ -7,6 +7,7 @@ function ModalVerOrden({ orden, onClose }) {
   const [historialProduccion, setHistorialProduccion] = useState([]);
   const [loadingHistorial, setLoadingHistorial] = useState(false);
   const [ordenDetalle, setOrdenDetalle] = useState(null);
+  const [estadoActual, setEstadoActual] = useState(ordenDetalle?.estado || 'PENDIENTE');
   const [procesos, setProcesos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingProcesos, setLoadingProcesos] = useState(true);
@@ -92,6 +93,18 @@ function ModalVerOrden({ orden, onClose }) {
     setShowModalProceso(false);
   };
 
+  const handleCambiarEstado = async (nuevoEstado) => {
+    try {
+        const response = await cambiarEstadoOrden(ordenDetalle.id_orden, nuevoEstado);
+        if (response.success) {
+            setEstadoActual(nuevoEstado);
+            alert(`✅ Estado actualizado a ${nuevoEstado}`);
+        }
+    } catch (error) {
+        alert('Error al cambiar el estado: ' + error.message);
+    }
+};
+
   // Mostrar loading
   if (loading) {
     return (
@@ -164,13 +177,14 @@ function ModalVerOrden({ orden, onClose }) {
 
             <div className="flex items-center gap-3">
               <select
-                className="bg-slate-700/70 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer text-sm"
-                defaultValue={ordenDetalle.estado || 'pendiente'}
+                  value={estadoActual}
+                  onChange={(e) => handleCambiarEstado(e.target.value)}
+                  className="bg-slate-700/70 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer text-sm"
               >
-                <option value="pendiente">📋 Pendiente</option>
-                <option value="proceso">⚙️ En Proceso</option>
-                <option value="completada">✅ Completada</option>
-                <option value="cancelada">❌ Cancelada</option>
+                  <option value="PENDIENTE">📋 Pendiente</option>
+                  <option value="EN_PROCESO">⚙️ En Proceso</option>
+                  <option value="COMPLETADA">✅ Completada</option>
+                  <option value="CANCELADA">❌ Cancelada</option>
               </select>
             </div>
           </div>
@@ -337,8 +351,7 @@ function ModalVerOrden({ orden, onClose }) {
                                 </td>
                                 <td className="py-2 px-3 text-sm text-red-400 font-medium">
                                     {registro.scrap}
-                                </td>
-                                
+                                </td>                               
                             </tr>
                         ))
                     )}

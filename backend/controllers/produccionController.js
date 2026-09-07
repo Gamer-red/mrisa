@@ -1,3 +1,4 @@
+const { data } = require('react-router-dom');
 const { pool } = require('../src/config/db');
 
 const crearOrdenProduccion = async (req, res) => {
@@ -13,17 +14,17 @@ const crearOrdenProduccion = async (req, res) => {
 
         const values = [
             id_material || null, 
-            producto.trim(),
-            cliente.trim(),
+            producto ? producto.trim() : null,
+            cliente ? cliente.trim() : null,
             cantidad || null,
             fecha_inicio || null,
             fecha_entrega || null,
-            prioridad.trim(),
-            numero_plano.trim(),
-            lote.trim(),
-            material.trim(),
-            grado_material.trim(),
-            notas.trim()
+            prioridad ? prioridad.trim() : null,
+            numero_plano ? numero_plano.trim() : null,
+            lote ? lote.trim() : null,
+            material ? material.trim() : null,
+            grado_material ? grado_material.trim():null,
+            notas ? notas.trim():null
         ]
 
         const result = await pool.query(query, values); 
@@ -158,6 +159,52 @@ const crearOrdenProceso = async (req, res)=>{
     }
 };
 
+const cambiarEstadoOrden = async (req, res)=>{
+    try{
+        const { id } = req.params;
+        const { estado } = req.body;
+
+        const estadosValidos = ['PENDIENTE', 'EN_PROCESO', 'COMPLETADA','CANCELADA'];
+
+        if (!estadosValidos.includes(estado)){
+            return res.status(400).json({
+                success: false,
+                message:'Estado invalido'
+            });
+        }
+
+        const checkQuery = 'SELECT id_orden FROM orden_produccion WHERE id_orden = $1';
+
+        const checkResult = await pool.query(checkQuery,[id]);
+
+        if(checkResult.rows.length === 0){
+            return res.status(404).json({
+                success:false,
+                message:'Orden no encontrada'
+            });
+        }
+
+        const query = `UPDATE orden_produccion SET estado = $1 WHERE id_orden = $2 RETURNING *`;
+
+        const result = await pool.query(query, [estado,id]);
+        const ordenActualizada = result.rows[0];
+
+        res.status(200).json({
+            success:true,
+            message:`Estado actualizado a ${estado} exitosamente`,
+            data:ordenActualizada
+        })
+
+    }catch(error){
+        console.error('Error al cambiar estado en orden:', error);
+        res.status(500).json({
+            success: false,
+            message:'Errro al cambiar el estado de la orden',
+            error:error.message
+        });
+    }
+}
+
 const obtenerOrdenProduccion = async (req, res) =>{
     try{
 
@@ -259,21 +306,21 @@ const obtenerOrdenesOperador = async (req, res) => {
         // 1.1 - Consulta SQL
         const query = `
             SELECT DISTINCT
-                o.id_orden,
-                o.producto,
-                o.cliente,
-                o.cantidad,
-                o.prioridad,
-                o.fecha_entrega,
-                o.estado
-            FROM orden_produccion o
-            INNER JOIN orden_proceso op ON o.id_orden = op.id_ordenproduccion
-            LEFT JOIN ejecucion_proceso e ON 
-                e.id_ordenproduccion = o.id_orden 
-                AND e.estado != 'TERMINADO'
-            WHERE o.estado = 'EN_PROCESO'
-                AND e.id_ejecucion IS NULL
-            ORDER BY o.prioridad DESC, o.fecha_entrega ASC
+    o.id_orden,
+    o.producto,
+    o.cliente,
+    o.cantidad,
+    o.prioridad,
+    o.fecha_entrega,
+    o.estado
+FROM orden_produccion o
+LEFT JOIN orden_proceso op ON o.id_orden = op.id_ordenproduccion
+LEFT JOIN ejecucion_proceso e ON 
+    e.id_ordenproduccion = o.id_orden 
+    AND e.estado != 'TERMINADO'
+WHERE o.estado = 'EN_PROCESO'
+    AND e.id_ejecucion IS NULL
+ORDER BY o.prioridad DESC, o.fecha_entrega ASC
         `;
 
         // 1.2 - Ejecutar consulta
@@ -1000,7 +1047,7 @@ const obtenerEmpleadosOperador = async (req, res) => {
     }
 };
 
-// Obtener historial completo de una orden
+
 const obtenerHistorialOrden = async (req, res) => {
     try {
         const { id } = req.params;
@@ -1081,6 +1128,7 @@ module.exports ={
     terminarEjecucion,
     obtenerHistorialEjecucion,
     obtenerEmpleadosOperador,
-    obtenerHistorialOrden
+    obtenerHistorialOrden,
+    cambiarEstadoOrden
 
 }
