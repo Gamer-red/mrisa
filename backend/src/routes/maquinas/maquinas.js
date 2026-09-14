@@ -5,7 +5,7 @@ const { crearMaquina, obtenerMaquinas, obteberMaquinaPorId, maquinaActualizada, 
 // Ruta para crear una nueva máquina (ALTA)
 router.post('/maquinas', crearMaquina);
 
-router.get('/maquinas',obtenerMaquinas);
+router.get('/maquina',obtenerMaquinas);
 
 router.get('/:id', obteberMaquinaPorId);
 

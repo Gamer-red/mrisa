@@ -22,22 +22,25 @@ export const crearMaquina = async (formData) => {
     }
 }
 
-export const obtenerMaquinas = async () =>{
-    try{
-        const response = await fetch(`${API_URL}/maquinas`, {
+export const obtenerMaquinas = async () => {
+    try {
+        const response = await fetch(`http://localhost:5000/api/maquinas/maquina`, {
             method: 'GET',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/json'
             }
         });
 
         const data = await response.json();
-        if(!response.ok){
-            throw new Error(data.message || 'Error al obtener las maquinas');
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Error al obtener las máquinas');
         }
+
         return data;
-    }catch(error){
-        console.error('Error en obtenerMaquinas',error)
+
+    } catch (error) {
+        console.error('Error en obtenerMaquinas:', error);
         throw error;
     }
-}
+};

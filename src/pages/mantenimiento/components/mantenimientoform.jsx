@@ -1,6 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect} from 'react';
+import { obtenerMaquinas } from '../../../services/maquinasService';
 
 function MantenimientoForm({ maquinaSeleccionada, onClose, onSubmit }) {
+    const [opcionesMaquinas, setOpcionesMaquinas] = useState([]);
+    const [loadingMaquinas, setLoadingMaquinas] = useState(true);
+
   const [formData, setFormData] = useState({
     maquina: maquinaSeleccionada?.maquina || '',
     tipo: maquinaSeleccionada?.tipo || '',
@@ -10,17 +14,6 @@ function MantenimientoForm({ maquinaSeleccionada, onClose, onSubmit }) {
     costo: '',
     notas: ''
   });
-
-  // Opciones para los listboxes
-  const opcionesMaquinas = [
-    'Seleccionar...',
-    'Torno CNC',
-    'Fresadora Universal',
-    'Compresor Industrial',
-    'Sistema Hidráulico',
-    'Robot Soldador',
-    'Transportador de Banda'
-  ];
 
   const opcionesTipos = [
     'Seleccionar...',
@@ -41,6 +34,27 @@ function MantenimientoForm({ maquinaSeleccionada, onClose, onSubmit }) {
     'Semestral',
     'Anual'
   ];
+
+  useEffect(() => {
+        cargarMaquinas();
+    }, []);
+
+  const cargarMaquinas = async () => {
+    try {
+        setLoadingMaquinas(true);
+        const data = await obtenerMaquinas();
+        console.log('📥 Respuesta del backend:', data); // ← Agrega esto
+        
+        if (data.success) {
+            setOpcionesMaquinas(data.data);
+            console.log('✅ Máquinas cargadas:', data.data); // ← Agrega esto
+        }
+    } catch (error) {
+        console.error('Error al cargar máquinas:', error);
+    } finally {
+        setLoadingMaquinas(false);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -83,22 +97,27 @@ function MantenimientoForm({ maquinaSeleccionada, onClose, onSubmit }) {
             {/* Máquina */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Máquina <span className="text-red-400">*</span>
+                  Máquina <span className="text-red-400">*</span>
               </label>
               <select
-                name="maquina"
-                value={formData.maquina}
-                onChange={handleChange}
-                className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
-                required
-                disabled={maquinaSeleccionada}
+                  name="maquina"
+                  value={formData.maquina}
+                  onChange={handleChange}
+                  className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
+                  required
+                  disabled={maquinaSeleccionada}
               >
-                {opcionesMaquinas.map((opcion, index) => (
-                  <option key={index} value={opcion}>{opcion}</option>
-                ))}
+                  <option value="">
+                      {loadingMaquinas ? 'Cargando máquinas...' : 'Selecciona una máquina'}
+                  </option>
+                  {opcionesMaquinas.map((maquina) => (
+                      <option key={maquina.id_maquina} value={maquina.id_maquina}>
+                          {maquina.nombre} - {maquina.tipo}
+                      </option>
+                  ))}
               </select>
               {maquinaSeleccionada && (
-                <p className="text-xs text-gray-400 mt-1">* Máquina pre-seleccionada</p>
+                  <p className="text-xs text-gray-400 mt-1">* Máquina pre-seleccionada</p>
               )}
             </div>
 
