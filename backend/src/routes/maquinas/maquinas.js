@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { crearMaquina, obtenerMaquina, obteberMaquinaPorId, maquinaActualizada, eliminarMaquinaPorId} = require('../../../controllers/maquinaController');
+const { crearMaquina, obtenerMaquinas, obteberMaquinaPorId, maquinaActualizada, eliminarMaquinaPorId} = require('../../../controllers/maquinaController');
 
 // Ruta para crear una nueva máquina (ALTA)
-router.post('/', crearMaquina);
+router.post('/maquinas', crearMaquina);
 
-router.get('/',obtenerMaquina);
+router.get('/maquinas',obtenerMaquinas);
 
 router.get('/:id', obteberMaquinaPorId);
 

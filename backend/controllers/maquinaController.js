@@ -56,7 +56,7 @@ const crearMaquina = async (req, res) => {
     }
 };
 
-const obtenerMaquina = async (req,res) => {
+const obtenerMaquinas = async (req,res) => {
     try{
         const query = `SELECT id_maquina, nombre, tipo, estado_operativo, notas FROM maquina ORDER BY id_maquina DESC`;
         const result = await pool.query(query);
@@ -200,7 +200,7 @@ const eliminarMaquinaPorId= async (req, res) => {
 // ============ EXPORTAR TODAS LAS FUNCIONES ============
 module.exports = {
     crearMaquina,
-    obtenerMaquina,
+    obtenerMaquinas,
     obteberMaquinaPorId,
     maquinaActualizada,
     eliminarMaquinaPorId

@@ -228,7 +228,6 @@ const obtenerOrdenProduccion = async (req, res) =>{
         });
     }
 }
-
 const obtenerOrdenProduccionid = async (req, res)=>{
      try{
             const { id } = req.params;

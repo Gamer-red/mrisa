@@ -40,14 +40,6 @@ function MantenimientoSidebar(){
                 Recursos humanos
               </h3>
               <ul className='mt-2 space-y-1'>
-                {/* <li >
-                <Link to="/mantenimiento"className={`px-3 py-2.5 hover:bg-slate-700/50 rounded-lg cursor-pointer text-gray-300 hover:text-white transition-all flex items-center ${!isOpen ? 'justify-center' : ''} ${location.pathname === '/mantenimiento' ? 'bg-slate-700/50 text-white' : ''}`}>
-                    <span className={`flex items-center ${isOpen ? 'gap-3' : 'gap-0'}`}>
-                      <span>📊</span>
-                      <span className={`${!isOpen && 'hidden'} transition-all`}>Dashboard</span>
-                    </span>
-                </Link>
-                </li>*/}
                 <li>
                   <Link to="/mantenimiento/reporte"className={`px-3 py-2.5 hover:bg-slate-700/50 rounded-lg cursor-pointer text-gray-300 hover:text-white transition-all flex items-center ${!isOpen ? 'justify-center' : ''} ${location.pathname === '/mantenimiento/reporte' ? 'bg-slate-700/50 text-white' : ''}`}>
                     <span className={`flex items-center ${isOpen ? 'gap-3' : 'gap-0'}`}>

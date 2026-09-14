@@ -85,7 +85,24 @@ function ProduccionSidebar() {
               </ul>
             </div>
 
-            {/* SECCIÓN 3: GESTIÓN - DESACTIVADA EN PRODUCCIÓN */}
+            <div className='mb-4 '>
+              <h3 className={`px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider ${!isOpen && 'hidden'}`}>
+                Maquinas
+              </h3>
+              <ul className='mt-2 space-y-1'>
+                <li>
+                  <Link to="/produccion/maquinas" 
+                    className={`px-3 py-2.5 hover:bg-slate-700/50 rounded-lg cursor-pointer text-gray-300 hover:text-white transition-all flex items-center ${!isOpen ? 'justify-center' : ''} ${location.pathname === '/produccion/maquinas' ? 'bg-slate-700/50 text-white' : ''}`}>
+                  
+                    <span className={`flex items-center ${isOpen ? 'gap-3' : 'gap-0'}`}>
+                      <span>📦</span>
+                      <span className={`${!isOpen && 'hidden'} transition-all`}>maquinas</span>
+                    </span>
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
             <div className='mb-4'>
               <h3 className={`px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider ${!isOpen && 'hidden'}`}>
                 Gestión

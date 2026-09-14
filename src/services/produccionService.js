@@ -1,4 +1,4 @@
-// services/ordenProduccionService.js
+
 
 // 1. URL base de tu API
 const API_URL = 'http://localhost:5000/api/produccion';
@@ -13,10 +13,6 @@ export const crearOrdenProduccion = async (formData) => {
         //if (!token) {
         //    throw new Error('No hay sesión activa. Inicia sesión nuevamente.');
         //}
-
-        console.log('URL:', `${API_URL}/orden`);
-        console.log('Datos a enviar:', formData);
-
         // 5. Hacer la petición fetch
         const response = await fetch(`${API_URL}/orden`, {
             method: 'POST',                    // Método HTTP

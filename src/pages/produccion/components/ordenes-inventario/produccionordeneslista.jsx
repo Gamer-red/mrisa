@@ -8,17 +8,6 @@ function Produccionordeneslista() {
   // Datos de ejemplo
   const materiales = [
     { 
-      id: 1, 
-      codigo: 'MAT-001', 
-      material: 'Acero Inoxidable 304', 
-      tipo: 'Materia Prima',
-      cantidadMaterial: '500 kg',
-      ruta: 'Almacén A-1',
-      stock: '450 kg',
-      costoUnitario: '$2.50',
-      estado: 'Disponible'
-    },
-    { 
       id: 2, 
       codigo: 'MAT-002', 
       material: 'Perno Hexagonal M8', 

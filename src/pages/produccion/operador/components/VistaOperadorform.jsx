@@ -35,10 +35,6 @@ function VistaOperador() {
     const [totalPiezas, setTotalPiezas] = useState(0);
     const [totalScrap, setTotalScrap] = useState(0);
     const [historial, setHistorial] = useState([]);
-
-    const [showModalPiezas, setShowModalPiezas] = useState(false);
-    const [showModalScrap, setShowModalScrap] = useState(false);
-
     // ========== FUNCIONES ==========
     
     // Cargar órdenes disponibles

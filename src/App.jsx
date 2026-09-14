@@ -17,6 +17,7 @@ import { ProduccionDashboard } from './pages/produccion';
 import { OrdenesDashboard } from './pages/produccion';
 import { InvenatarioProduccionDashboard } from './pages/produccion';
 import { OperadorDashboard } from './pages/produccion'
+import { MaquinasDashboard} from './pages/produccion'
 
 //RH
 import { EmpleadosDashboard } from './pages/rh'
@@ -147,6 +148,16 @@ function App() {
                            // <PrivateRoute allowedRoles={['produccion']}>
                                 <ProduccionLayout>
                                     <OperadorDashboard />
+                                </ProduccionLayout>
+                           // </PrivateRoute>
+                        }
+                    />
+                    <Route
+                        path="/produccion/maquinas"
+                        element={
+                           // <PrivateRoute allowedRoles={['produccion']}>
+                                <ProduccionLayout>
+                                    <MaquinasDashboard />
                                 </ProduccionLayout>
                            // </PrivateRoute>
                         }
