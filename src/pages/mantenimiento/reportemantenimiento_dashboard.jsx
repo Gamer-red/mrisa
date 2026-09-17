@@ -1,67 +1,54 @@
 import React, { useState } from 'react';
-import MantenimientoLista from './components/MantenimientoLista';
-import MantenimientoForm from './components/MantenimientoForm';
-
+import  MantenimientoForm from './components/mantenimientoform';
+import { crearmantenimiento } from '../../services/manteniminetoService';
 function ReporteMantenimientoDashboard() {
-  const [mostrarFormulario, setMostrarFormulario] = useState(false);
-  const [maquinaSeleccionada, setMaquinaSeleccionada] = useState(null);
+   const [showModal, setShowModal] = useState(false);
 
-  // Datos de ejemplo de máquinas
-  const maquinas = [
-  ];
+   const handleGuardarMantenimiento = async (formData) =>{
+    try{
+        const response = await crearmantenimiento(formData);
+        if(response.success){
+            alert('Mantenimiento creado exitosamente')
+        }
+    }catch(error){
+        alert(error.message || 'Error al guardar el mantenimiento');
+    }
+   };
 
-  // Función para manejar el click del botón Programar
-  const handleProgramarClick = (maquina) => {
-    setMaquinaSeleccionada(maquina);
-    setMostrarFormulario(true);
-  };
+    return (
+        <div className="p-6 space-y-6">
+            {/* Título y botón */}
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-2xl font-bold text-white">🔧 Mantenimiento</h1>
+                    <p className="text-gray-400 text-sm">Gestión de mantenimientos de máquinas</p>
+                </div>
+                
+                <button
+                    onClick={() => setShowModal(true)}
+                    className="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors shadow-lg shadow-blue-500/25 flex items-center gap-2"
+                >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    Agregar Mantenimiento
+                </button>
+            </div>
 
-  // Función para cerrar el formulario
-  const handleCloseForm = () => {
-    setMostrarFormulario(false);
-    setMaquinaSeleccionada(null);
-  };
+            {/* Contenido de muestra */}
+            <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 p-8 text-center">
+                <p className="text-gray-400 text-sm">
+                    Aquí se mostrará la lista de mantenimientos
+                </p>
+            </div>
 
-  // Función para manejar el envío del formulario
-  const handleSubmitForm = (data) => {
-    console.log('Mantenimiento programado:', data);
-    setMostrarFormulario(false);
-    setMaquinaSeleccionada(null);
-  };
-
-  return (
-    <div className="h-full flex flex-col overflow-hidden">
-      {/* Header con título y botón Programar */}
-      <div className="flex justify-between items-center mb-4 flex-shrink-0">
-        <h1 className="text-2xl font-bold text-white">Mantenimiento de Máquinas</h1>
-        
-        <button 
-          onClick={() => handleProgramarClick(null)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 text-sm flex-shrink-0"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          Programar
-        </button>
-      </div>
-
-      {/* Tabla de máquinas */}
-      <MantenimientoLista 
-        maquinas={maquinas}
-        onProgramar={handleProgramarClick}
-      />
-
-      {/* Modal del formulario */}
-      {mostrarFormulario && (
-        <MantenimientoForm 
-          maquinaSeleccionada={maquinaSeleccionada}
-          onClose={handleCloseForm}
-          onSubmit={handleSubmitForm}
-        />
-      )}
-    </div>
-  );
+            <MantenimientoForm
+                isOpen={showModal}
+                onClose={() => setShowModal(false)}
+                onSave = {handleGuardarMantenimiento}
+            />
+        </div>
+    );
 }
 
 export default ReporteMantenimientoDashboard;

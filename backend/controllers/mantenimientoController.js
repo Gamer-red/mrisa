@@ -28,6 +28,16 @@ const crearMantenimiento = async (req, res) =>{
         const result = await pool.query(query,values);
         const id_mantenimiento = result.rows[0];
 
+        const updateQuery = `
+            UPDATE maquina 
+            SET estado_operativo = 'EN_MANTENIMIENTO'
+            WHERE id_maquina = $1
+        `;
+        await pool.query(updateQuery, [id_maquina]);
+
+        // 4. Confirmar transacción
+        await pool.query('COMMIT');
+
         res.status(201).json({
             success: true,
             message: 'Mantenimiento creado correctamente',
