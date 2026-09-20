@@ -22,3 +22,25 @@ export const crearmantenimiento = async (formData) =>{
         throw error;
     }
 }
+
+export const mantenimientolista = async (formData) => {
+    try{
+        const response = await fetch (`${API_URL}/MantenimientoLista`,{
+            method: 'GET',
+            headers :{
+                'Content-Type':
+                'application/json'
+            }
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Error al obtener los mantenimientos');
+        }
+
+        return data;
+    }catch(error){
+        console.error('Error en obtener los mantenimeintos:', error);
+        throw error;
+    }
+}

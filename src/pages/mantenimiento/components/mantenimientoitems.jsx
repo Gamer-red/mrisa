@@ -1,47 +1,67 @@
 import React from 'react';
 
-function MantenimientoItems({ maquina, onProgramar }) {
-  // Función para obtener el color del estado
-  const getEstadoColor = (estado) => {
-    const colores = {
-      'Pendiente': 'bg-yellow-500/20 text-yellow-400',
-      'En Proceso': 'bg-blue-500/20 text-blue-400',
-      'Completado': 'bg-green-500/20 text-green-400'
+function MantenimientoItems({ mantenimiento }) {
+    // Formatear fecha
+    const formatearFecha = (fecha) => {
+        if (!fecha) return '-';
+        const date = new Date(fecha);
+        return date.toLocaleDateString('es-MX');
     };
-    return colores[estado] || 'bg-gray-500/20 text-gray-400';
-  };
 
-  // Función para obtener el color del tipo
-  const getTipoColor = (tipo) => {
-    const colores = {
-      'Mecánico': 'bg-orange-500/20 text-orange-400',
-      'Eléctrico': 'bg-yellow-500/20 text-yellow-400',
-      'Hidráulico': 'bg-blue-500/20 text-blue-400',
-      'Robótico': 'bg-purple-500/20 text-purple-400'
+    // Formatear costo
+    const formatearCosto = (costo) => {
+        if (!costo) return '-';
+        return `$${parseFloat(costo).toFixed(2)}`;
     };
-    return colores[tipo] || 'bg-gray-500/20 text-gray-400';
-  };
 
-  return (
-    <tr className="hover:bg-slate-700/30 transition-colors cursor-pointer" onClick={() => onProgramar(maquina)}>
-      <td className="px-3 py-2 whitespace-nowrap text-sm text-white font-medium">{maquina.maquina}</td>
-      <td className="px-3 py-2 whitespace-nowrap">
-        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getTipoColor(maquina.tipo)}`}>
-          {maquina.tipo}
-        </span>
-      </td>
-      <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-300">{maquina.descripcion}</td>
-      <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-300">{maquina.frecuencia}</td>
-      <td className="px-3 py-2 whitespace-nowrap">
-        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getEstadoColor(maquina.estado)}`}>
-          {maquina.estado}
-        </span>
-      </td>
-      <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-300">{maquina.fecha}</td>
-      <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-300">{maquina.proxima}</td>
-      <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-300">{maquina.costo}</td>
-    </tr>
-  );
+    return (
+        <tr className="hover:bg-slate-700/30 transition-colors">
+            <td className="px-6 py-3 text-sm text-gray-300">{mantenimiento.id_mantenimiento}</td>
+            <td className="px-6 py-3 text-sm text-white font-medium">
+                {mantenimiento.nombre_maquina || `Máquina #${mantenimiento.id_maquina}`}
+            </td>
+            <td className="px-6 py-3 text-sm text-gray-300">{mantenimiento.tipo}</td>
+            <td className="px-6 py-3 text-sm text-gray-300">{mantenimiento.frecuencia}</td>
+            <td className="px-6 py-3 text-sm text-gray-300">{formatearFecha(mantenimiento.fecha)}</td>
+            <td className="px-6 py-3 text-sm text-green-400 font-medium">
+                {formatearCosto(mantenimiento.costo)}
+            </td>
+            <td className="px-6 py-3">
+                <div className="flex items-center gap-2">
+                    {/* Botón Ver */}
+                    <button
+                        className="p-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded transition-colors"
+                        title="Ver detalles"
+                    >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                    </button>
+
+                    {/* Botón Editar */}
+                    <button
+                        className="p-1.5 bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-400 rounded transition-colors"
+                        title="Editar mantenimiento"
+                    >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                    </button>
+
+                    {/* Botón Eliminar */}
+                    <button
+                        className="p-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded transition-colors"
+                        title="Eliminar mantenimiento"
+                    >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    );
 }
 
 export default MantenimientoItems;

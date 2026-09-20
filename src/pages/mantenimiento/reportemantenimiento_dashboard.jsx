@@ -1,14 +1,43 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect} from 'react';
 import  MantenimientoForm from './components/mantenimientoform';
+import MantenimientoLista from './components/mantenimientolista';
 import { crearmantenimiento } from '../../services/manteniminetoService';
+import { mantenimientolista } from '../../services/manteniminetoService'
 function ReporteMantenimientoDashboard() {
    const [showModal, setShowModal] = useState(false);
+   const [mantenimientos, setMantenimientos] = useState([]);
+   const [loading, setLoading] = useState(false);
+   const [error, setError] = useState(null);
+
+   const cargarMantenimientos = async () => {
+        try {
+            setLoading(true);
+            const data = await mantenimientolista();
+            
+            if (data.success) {
+                setMantenimientos(data.data);
+            }
+        } catch (error) {
+            setError(error.message || 'Error al cargar los mantenimientos');
+        } finally {
+            setLoading(false);
+        }
+    };
+    useEffect(() => {
+        cargarMantenimientos();
+    }, []);
 
    const handleGuardarMantenimiento = async (formData) =>{
     try{
         const response = await crearmantenimiento(formData);
         if(response.success){
             alert('Mantenimiento creado exitosamente')
+            await cargarMantenimientos();
+
+            setMantenimientos(prev => [{
+            id_mantenimiento: prev.length + 1,
+            ...formData
+        }, ...prev]);
         }
     }catch(error){
         alert(error.message || 'Error al guardar el mantenimiento');
@@ -36,11 +65,11 @@ function ReporteMantenimientoDashboard() {
             </div>
 
             {/* Contenido de muestra */}
-            <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 p-8 text-center">
-                <p className="text-gray-400 text-sm">
-                    Aquí se mostrará la lista de mantenimientos
-                </p>
-            </div>
+            <MantenimientoLista 
+                mantenimientos={mantenimientos}
+                loading={loading}
+                error={error}
+            />
 
             <MantenimientoForm
                 isOpen={showModal}

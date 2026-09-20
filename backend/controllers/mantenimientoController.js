@@ -55,7 +55,19 @@ const crearMantenimiento = async (req, res) =>{
 
 const mantenimientoLista = async (req, res) =>{
     try{
-        const query = `SELECT id_mantenimiento, id_maquina, tipo, frecuencia, descripcion, fecha, costo, notas FROM mantenimiento ORDER BY id_mantenimiento DESC`;
+        const query = ` SELECT 
+                m.id_mantenimiento, 
+                m.id_maquina, 
+                m.tipo, 
+                m.frecuencia, 
+                m.descripcion, 
+                m.fecha, 
+                m.costo, 
+                m.notas,
+                ma.nombre as nombre_maquina
+            FROM mantenimiento m
+            LEFT JOIN maquina ma ON m.id_maquina = ma.id_maquina
+            ORDER BY m.id_mantenimiento DESC`;
         const result = await pool.query(query);
         const mantenimiento = result.rows;
 
