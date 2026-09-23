@@ -1,18 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState  } from 'react';
+import { crearMaterial } from '../../../services/almacenService';
 
-function AlmacenForm({ onClose, onSubmit }) {
+function AlmacenForm({ onClose, onSubmit, onSave}) {
+  const [guardando, setGuardando] = useState(false);
   const [formData, setFormData] = useState({
-    codigoInterno: '',
+    codigo_interno: '',
     nombre: '',
-    tipoClasificacion: '',
-    categoriaMaterial: '',
-    rutaAbastecimiento: '',
-    sePuedeVender: '',
-    stockActual: '',
-    unidad: '',
-    stockMinimo: '',
-    costoUnitario: ''
-  });
+    tipo: '',
+    categoria: '',
+    stock: '',
+    unidad: ''
+});
 
   // Opciones para los listboxes
   const opcionesTipoClasificacion = [
@@ -27,31 +25,48 @@ function AlmacenForm({ onClose, onSubmit }) {
     'Plásticos',
     'Químicos',
   ];
-
-  const opcionesRutaAbastecimiento = [
-    'Seleccionar...',
-    'Proveedor Nacional',
-  ];
-
-  const opcionesSePuedeVender = [
-    'Seleccionar...',
-    'Sí',
-    'No'
-  ];
-
   const opcionesUnidad = [
     'Seleccionar...',
     'Kg',
     'g',
+    'L'
   ];
 
-  const handleChange = (e) => {
+ const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
-      ...prev,
-      [name]: value
+        ...prev,
+        [name]: value
     }));
-  };
+};
+
+const handleGuardar = async () => {
+    try {
+        setGuardando(true);
+
+        // Validar campos obligatorios
+        if (!formData.codigo_interno || !formData.nombre || !formData.tipo || !formData.categoria || !formData.stock || !formData.unidad) {
+            alert('Por favor completa todos los campos obligatorios');
+            return;
+        }
+
+        // Llamar al service
+        const response = await crearMaterial(formData);
+
+        if (response.success) {
+            alert('✅ Material creado exitosamente');
+            if (onSave) {
+                onSave(response.data);
+            }
+            onClose();
+        }
+    } catch (error) {
+        alert(error.message || 'Error al guardar el material');
+    } finally {
+        setGuardando(false);
+    }
+};
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -88,8 +103,8 @@ function AlmacenForm({ onClose, onSubmit }) {
               </label>
               <input
                 type="text"
-                name="codigoInterno"
-                value={formData.codigoInterno}
+                name="codigo_interno"
+                value={formData.codigo_interno}
                 onChange={handleChange}
                 placeholder="Ej: MAT-001"
                 className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
@@ -119,8 +134,8 @@ function AlmacenForm({ onClose, onSubmit }) {
                 Tipo/Clasificación <span className="text-red-400">*</span>
               </label>
               <select
-                name="tipoClasificacion"
-                value={formData.tipoClasificacion}
+                name="tipo"
+                value={formData.tipo}
                 onChange={handleChange}
                 className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
                 required
@@ -137,8 +152,8 @@ function AlmacenForm({ onClose, onSubmit }) {
                 Categoría de Material <span className="text-red-400">*</span>
               </label>
               <select
-                name="categoriaMaterial"
-                value={formData.categoriaMaterial}
+                name="categoria"
+                value={formData.categoria}
                 onChange={handleChange}
                 className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
                 required
@@ -147,10 +162,7 @@ function AlmacenForm({ onClose, onSubmit }) {
                   <option key={index} value={opcion}>{opcion}</option>
                 ))}
               </select>
-            </div>
-
-            {/* Se puede vender? */}
-            
+            </div>            
             {/* Stock Actual */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -158,8 +170,8 @@ function AlmacenForm({ onClose, onSubmit }) {
               </label>
               <input
                 type="number"
-                name="stockActual"
-                value={formData.stockActual}
+                name="stock"
+                value={formData.stock}
                 onChange={handleChange}
                 placeholder="0"
                 min="0"
@@ -198,7 +210,8 @@ function AlmacenForm({ onClose, onSubmit }) {
               Cancelar
             </button>
             <button
-              type="submit"
+              onClick={handleGuardar}
+              disabled={guardando}
               className="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors shadow-lg shadow-blue-500/30"
             >
               Agregar Material

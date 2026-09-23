@@ -2,9 +2,9 @@ const express = require('express');
 const router = express.Router();
 const { crearMaterial, obtenerMateriales, obtenerMaterialPorId, eliminarMaterialPorid, materialActualizado} = require('../../../controllers/materialController');
 
-router.post('/', crearMaterial);
+router.post('/CrearMaterial', crearMaterial);
 
-router.get('/', obtenerMateriales);
+router.get('/ObtenerMateriales', obtenerMateriales);
 
 router.get('/:id', obtenerMaterialPorId);
 

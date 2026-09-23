@@ -34,10 +34,10 @@ const crearMaterial = async (req , res)=>{
         console.error('Error al crear materual:', error);
 
         // Manejar errores específicos de PostgreSQL
-        if (error.code === '23505') { // Violación de unique constraint
+        if (error.code === '23505') {
             return res.status(409).json({
                 success: false,
-                message: 'Ya existe una máquina con ese nombre',
+                message: 'Ya existe un material con ese nombre',
                 error: error.detail
             });
         }
