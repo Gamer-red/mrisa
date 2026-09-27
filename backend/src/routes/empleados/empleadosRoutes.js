@@ -8,7 +8,7 @@ const { crearEmpleado, obtenerEmpleados, obetenerEmpleadoPorId, empleadoActualiz
 
 // POST - Crear un nuevo empleado (solo Recursos Humanos)
 router.post(
-    '/', 
+    '/CrearEmpleado', 
     //verificarToken,                    // 1. Verificar que el usuario esté autenticado
     //verificarRol(['recursos_humanos']), // 2. Verificar que sea de RH
     uploadFields,                      // 3. Procesar los archivos
@@ -18,7 +18,7 @@ router.post(
 
 // GET - Obtener todos los empleados (solo Recursos Humanos)
 router.get(
-    '/',
+    '/ObtenerEmpleados',
     //verificarToken,
     //verificarRol(['recursos_humanos']),
     obtenerEmpleados

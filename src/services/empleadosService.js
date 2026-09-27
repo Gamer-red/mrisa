@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'http://localhost:5000/api/rh';
 
 export const empleadosService = {
     // Crear nuevo empleado
@@ -11,7 +11,7 @@ export const empleadosService = {
                 throw new Error('No hay sesión activa. Inicia sesión nuevamente.');
             }
             
-            const response = await fetch(`${API_URL}/empleados`, {
+            const response = await fetch(`${API_URL}/CrearEmpleado`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -34,7 +34,7 @@ export const empleadosService = {
     },
     
     // Obtener todos los empleados (para la tabla)
-    obtenerTodos: async () => {
+    obtenerEmpleados: async () => {
         try {
             const token = localStorage.getItem('token');
             
@@ -42,7 +42,7 @@ export const empleadosService = {
                 throw new Error('No hay sesión activa');
             }
             
-            const response = await fetch(`${API_URL}/empleados`, {
+            const response = await fetch(`${API_URL}/ObtenerEmpleados`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,

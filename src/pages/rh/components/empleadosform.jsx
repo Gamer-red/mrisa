@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useAuth } from '../../context/authcontext';
-import { empleadosService } from '../../services/empleadosService';
+import { useAuth } from '../../../context/authcontext';
+import { empleadosService } from '../../../services/empleadosService';
 
 function EmpleadoForm({ onClose, onSubmit }) {
   const [formData, setFormData] = useState({

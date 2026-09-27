@@ -29,7 +29,7 @@ console.log('🔄 Cargando rutas...');
 //app.use('/api/auth', authRoutes);
 
 // Rutas de empleados (NUEVO)
-app.use('/api/empleados', empleadosRoutes);
+app.use('/api/rh', empleadosRoutes);
 
 app.use('/api/calidad', calidadRoutes);
 
