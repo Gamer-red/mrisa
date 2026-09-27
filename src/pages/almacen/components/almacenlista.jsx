@@ -1,7 +1,7 @@
 import React from 'react';
 import AlmacenItems from './almacenitems';
 
-function AlmacenLista({ materiales }) {
+function AlmacenLista({ materiales,soloLectura = false }) {
   return (
     <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 overflow-hidden">
       <div className="flex-1 overflow-auto">
@@ -14,13 +14,16 @@ function AlmacenLista({ materiales }) {
                 <th className="px-3 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">Categoria</th>
                 <th className="px-3 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">Stock</th>
                 <th className="px-3 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">Unidad</th>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">Acciones</th>
+                {!soloLectura && <th>Acciones</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-700/50">
               {materiales.length > 0 ? (
                 materiales.map((material) => (
-                  <AlmacenItems key={material.id} material={material} />
+                  <AlmacenItems 
+                  key={material.id} 
+                  material={material}
+                  soloLectura={soloLectura} />
                 ))
               ) : (
                 <tr>

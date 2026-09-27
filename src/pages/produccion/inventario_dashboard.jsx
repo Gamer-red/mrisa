@@ -1,5 +1,5 @@
 import React from 'react';
-import Produccionordeneslista from './components/ordenes-inventario/produccionordeneslista';
+import Produccionordeneslista from './components/ordenes-almacen/produccionordeneslista';
 
 function InvenatarioProduccionDashboard(){
       return (

@@ -1,6 +1,6 @@
 import React from 'react';
 
-function AlmacenItems({ material }) {
+function AlmacenItems({ material, soloLectura = false}) {
     return (
         <tr className="hover:bg-slate-700/30 transition-colors">
             <td className="px-3 py-2 text-sm text-gray-300">{material.codigo_interno}</td>
@@ -9,7 +9,8 @@ function AlmacenItems({ material }) {
             <td className="px-3 py-2 text-sm text-gray-300">{material.categoria}</td>
             <td className="px-3 py-2 text-sm text-blue-400 font-medium">{material.stock}</td>
             <td className="px-3 py-2 text-sm text-gray-300">{material.unidad}</td>
-            <td className="px-3 py-2">
+            {!soloLectura && (
+                <td className="px-3 py-2">
                 <div className="flex items-center gap-2">
                     {/* Botón Ver */}
                     <button
@@ -43,6 +44,7 @@ function AlmacenItems({ material }) {
                     </button>
                 </div>
             </td>
+            )}
         </tr>
     );
 }
