@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../../context/authcontext';
-import { empleadosService } from '../../../services/empleadosService';
+import { crearEmpleado } from '../../../services/empleadosService';
 
 function EmpleadoForm({ onClose, onSubmit }) {
   const [formData, setFormData] = useState({
@@ -62,11 +62,7 @@ function EmpleadoForm({ onClose, onSubmit }) {
   };
 
   const handleSubmit = async (e) => {
-        e.preventDefault();
-        
-        // Mostrar loading (opcional)
-        // setIsLoading(true);
-        
+        e.preventDefault();  
         try {
             // Crear FormData para enviar archivos
             const formDataToSend = new FormData();
@@ -104,8 +100,7 @@ function EmpleadoForm({ onClose, onSubmit }) {
             });
             
             // Enviar al backend
-            const response = await empleadosService.crear(formDataToSend);
-            
+           const response = await crearEmpleado(formDataToSend);
             if (response.success) {
                 console.log('✅ Empleado registrado:', response.data);
                 alert('Empleado registrado exitosamente');
@@ -124,10 +119,8 @@ function EmpleadoForm({ onClose, onSubmit }) {
             console.error('❌ Error al registrar:', error);
             alert(error.message || 'Error al registrar empleado');
         } finally {
-            // setIsLoading(false);
         }
     };
-
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-5xl max-h-[90vh] overflow-y-auto">

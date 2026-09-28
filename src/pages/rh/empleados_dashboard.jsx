@@ -1,75 +1,74 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import EmpleadoForm from '../rh/components/empleadosform';
 import EmpleadosLista from '../rh/components/empleadoslista';
+import { obtenerEmpleados } from '../../services/empleadosService';
 
 function EmpleadosDashboard() {
-  const [mostrarFormulario, setMostrarFormulario] = useState(false);
+    const [empleados, setEmpleados] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [mostrarFormulario, setMostrarFormulario] = useState(false);
 
-  // Datos de ejemplo de empleados - SOLO DATOS BÁSICOS
-  const empleados = [];
+    const cargarEmpleados = async () => {
+        try {
+            setLoading(true);
+            const data = await obtenerEmpleados();
+            console.log('Respuesta del backend:', data);
 
-  // Función para manejar el click del botón
-  const handleAgregarEmpleadoClick = () => {
-    setMostrarFormulario(true);
-  };
+            if (data.success) {
+                setEmpleados(data.data);
+            }
+        } catch (error) {
+            setError(error.message || 'Error al cargar los empleados');
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  // Función para cerrar el formulario
-  const handleCloseForm = () => {
-    setMostrarFormulario(false);
-  };
+    useEffect(() => {
+        cargarEmpleados();
+    }, []);
 
-  // Función para manejar el envío del formulario
-  const handleSubmitForm = (data) => {
-    console.log('Nuevo empleado registrado:', data);
-    setMostrarFormulario(false);
-  };
+    const handleCloseForm = () => {
+        setMostrarFormulario(false);
+    };
 
-  // Funciones para los botones de acción
-  const handleVer = (empleado) => {
-    console.log('Ver empleado:', empleado);
-  };
+    const handleSubmitForm = async () => {
+        await cargarEmpleados();
+        setMostrarFormulario(false);
+    };
 
-  const handleModificar = (empleado) => {
-    console.log('Modificar empleado:', empleado);
-  };
+    return (
+        <div className="p-6 space-y-6">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-2xl font-bold text-white">👥 Empleados</h1>
+                    <p className="text-gray-400 text-sm">Gestión de empleados</p>
+                </div>
+                <button
+                    onClick={() => setMostrarFormulario(true)}
+                    className="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors shadow-lg shadow-blue-500/25"
+                >
+                    Agregar Empleado
+                </button>
+            </div>
 
-  const handleEliminar = (empleado) => {
-    console.log('Eliminar empleado:', empleado);
-  };
+            {/* Tabla de empleados */}
+            <EmpleadosLista
+                empleados={empleados}
+                loading={loading}
+                error={error}
+            />
 
-  // Función para obtener el color del estado
-  const getEstadoColor = (estado) => {
-    return estado === 'Activo' 
-      ? 'bg-green-500/20 text-green-400' 
-      : 'bg-red-500/20 text-red-400';
-  };
-
-  return (
-    <div className="h-full flex flex-col overflow-hidden">
-      {/* Header con título y botón */}
-      <div className="flex justify-between items-center mb-4 flex-shrink-0">
-        <h1 className="text-2xl font-bold text-white">Recursos Humanos</h1>
-        
-        <button 
-          onClick={handleAgregarEmpleadoClick}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 text-sm flex-shrink-0"
-        >
-          <span className="text-lg leading-none">+</span>
-          Agregar Empleado
-        </button>
-      </div>
-
-      {/* Tabla de empleados con scroll horizontal y vertical */}
-      <EmpleadosLista/>
-      {/* Modal del formulario */}
-      {mostrarFormulario && (
-        <EmpleadoForm 
-          onClose={handleCloseForm}
-          onSubmit={handleSubmitForm}
-        />
-      )}
-    </div>
-  );
+            {/* Modal del formulario */}
+            {mostrarFormulario && (
+                <EmpleadoForm
+                    onClose={handleCloseForm}
+                    onSubmit={handleSubmitForm}
+                />
+            )}
+        </div>
+    );
 }
 
 export default EmpleadosDashboard;

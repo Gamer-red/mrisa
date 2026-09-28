@@ -1,19 +1,13 @@
 import React from 'react';
 
-function EmpleadosItems(){
+function EmpleadosItems({empleado}){
     return(
     <tr className="hover:bg-slate-700/30 transition-colors">
-                    <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-400"></td>
-                    <td className="px-3 py-2 whitespace-nowrap text-sm text-white"></td>
-                    <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-300"></td>
-                    <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-300"></td>
-                    <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-300"></td>
-                    <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-300"></td>
-                    <td className="px-3 py-2 whitespace-nowrap">
-                      <span>
-                        
-                      </span>
-                    </td>
+                    <td className="px-3 py-2 whitespace-nowrap text-sm text-white">{empleado.nombre}</td>
+                    <td className="px-3 py-2 whitespace-nowrap text-sm text-white">{empleado.apellido_paterno}</td>
+                    <td className="px-3 py-2 whitespace-nowrap text-sm text-white">{empleado.apellido_materno}</td>
+                    <td className="px-3 py-2 whitespace-nowrap text-sm text-white">{empleado.puesto}</td>
+                    <td className="px-3 py-2 whitespace-nowrap text-sm text-white">{empleado.estado}</td>
                     <td className="px-3 py-2 whitespace-nowrap">
                       <div className="flex items-center justify-center gap-2">
                         {/* Botón Ver */}
