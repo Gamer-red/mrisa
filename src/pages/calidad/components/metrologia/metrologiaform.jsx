@@ -1,20 +1,23 @@
 import React, { useState } from 'react';
+import { crearInstrumento } from '../../../../services/instrumentoService';
 
-function MetrologiaForm({ onClose, onSubmit, instrumentoEditar }) {
-  const [formData, setFormData] = useState({
-    codigoInterno: instrumentoEditar?.codigoInterno || '',
-    nombre: instrumentoEditar?.nombre || '',
-    tipo: instrumentoEditar?.tipo || '',
-    ubicacion: instrumentoEditar?.ubicacion || '',
-    marca: instrumentoEditar?.marca || '',
-    modelo: instrumentoEditar?.modelo || '',
-    nSerie: instrumentoEditar?.nSerie || '',
-    rangoMedicion: instrumentoEditar?.rangoMedicion || '',
-    resolucion: instrumentoEditar?.resolucion || '',
-    exactitud: instrumentoEditar?.exactitud || '',
-    notas: instrumentoEditar?.notas || '',
-    estado: instrumentoEditar?.estado || 'Activo'
-  });
+function MetrologiaForm({ onClose, instrumentoEditar, onSave }) {
+    const [formData, setFormData] = useState({
+      codigo_interno: '',
+      nombre_descriptivo: '',
+      tipo_instrumento: '',
+      ubicacion: '',
+      marca: '',
+      modelo: '',
+      numero_serie: '',
+      estado: 'ACTIVO',
+      rango_medicion: '',
+      resolucion: '',
+      exactitud: '',
+      notas: ''
+});
+
+const [guardando, setGuardando] = useState(false);
 
   // Opciones para los listboxes
   const opcionesTipo = [
@@ -37,28 +40,26 @@ function MetrologiaForm({ onClose, onSubmit, instrumentoEditar }) {
     }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    
-    // Validar campos requeridos
-    if (!formData.codigoInterno.trim()) {
-      alert('El código interno es requerido');
-      return;
-    }
-    if (!formData.nombre.trim()) {
-      alert('El nombre descriptivo es requerido');
-      return;
-    }
-    if (!formData.tipo || formData.tipo === 'Seleccionar...') {
-      alert('Seleccione un tipo de instrumento');
-      return;
-    }
+  const handleGuardar = async () => {
+    try {
+        setGuardando(true);
+        const response = await crearInstrumento(formData);
 
-    if (onSubmit) {
-      onSubmit(formData);
+        if (response.success) {
+            alert('✅ Instrumento creado exitosamente');
+            if (onSave) onSave(response.data);
+            onClose();
+        }
+    } catch (error) {
+        alert(error.message || 'Error al guardar el instrumento');
+    } finally {
+        setGuardando(false);
     }
-    onClose();
-  };
+};
+
+const handleSubmit = (e) => {
+  e.preventDefault();
+};
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -88,8 +89,8 @@ function MetrologiaForm({ onClose, onSubmit, instrumentoEditar }) {
               </label>
               <input
                 type="text"
-                name="codigoInterno"
-                value={formData.codigoInterno}
+                name="codigo_interno"
+                value={formData.codigo_interno}
                 onChange={handleChange}
                 placeholder="Ej: INS-001"
                 className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
@@ -104,8 +105,8 @@ function MetrologiaForm({ onClose, onSubmit, instrumentoEditar }) {
               </label>
               <input
                 type="text"
-                name="nombre"
-                value={formData.nombre}
+                name="nombre_descriptivo"
+                value={formData.nombre_descriptivo}
                 onChange={handleChange}
                 placeholder="Ej: Calibrador de Altura"
                 className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
@@ -119,8 +120,8 @@ function MetrologiaForm({ onClose, onSubmit, instrumentoEditar }) {
                 Tipo de Instrumento <span className="text-red-400">*</span>
               </label>
               <select
-                name="tipo"
-                value={formData.tipo}
+                name="tipo_instrumento"
+                value={formData.tipo_instrumento}
                 onChange={handleChange}
                 className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
                 required
@@ -186,8 +187,8 @@ function MetrologiaForm({ onClose, onSubmit, instrumentoEditar }) {
               </label>
               <input
                 type="text"
-                name="nSerie"
-                value={formData.nSerie}
+                name="numero_serie"
+                value={formData.numero_serie}
                 onChange={handleChange}
                 placeholder="Ej: 12345678"
                 className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
@@ -220,8 +221,8 @@ function MetrologiaForm({ onClose, onSubmit, instrumentoEditar }) {
               </label>
               <input
                 type="text"
-                name="rangoMedicion"
-                value={formData.rangoMedicion}
+                name="rango_medicion"
+                value={formData.rango_medicion}
                 onChange={handleChange}
                 placeholder="Ej: 0-100 mm"
                 className="w-full bg-slate-700/50 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
@@ -283,17 +284,17 @@ function MetrologiaForm({ onClose, onSubmit, instrumentoEditar }) {
             >
               Cancelar
             </button>
-            <button
-              type="submit"
-              className="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors shadow-lg shadow-blue-500/30"
-            >
-              {instrumentoEditar ? 'Actualizar Instrumento' : 'Guardar Instrumento'}
-            </button>
+              <button
+                  onClick={handleGuardar}
+                  disabled={guardando}
+                  className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+              >
+                  {guardando ? 'Guardando...' : 'Guardar Instrumento'}
+              </button>
           </div>
         </form>
       </div>
     </div>
   );
 }
-
 export default MetrologiaForm;

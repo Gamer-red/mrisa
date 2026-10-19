@@ -1,8 +1,5 @@
 const { pool } = require('../src/config/db');
-/**
- * Crear una nueva máquina
- * POST /api/maquinas
- */
+
 const crearMaquina = async (req, res) => {
 
     try {

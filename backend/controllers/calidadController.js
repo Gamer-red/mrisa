@@ -372,7 +372,6 @@ const eliminarInspeccionPorId = async (req, res) => {
     }
 };
 
-
 module.exports = {
     crearInspeccion,
     obtenerInspecciones,

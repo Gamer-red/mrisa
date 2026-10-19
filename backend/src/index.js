@@ -8,6 +8,7 @@ const empleadosRoutes = require('./routes/empleados/empleadosRoutes');
 const materialRoutes = require ('../src/routes/material/material')
 const calidadRoutes = require('./routes/calidad/calidadRoutes');
 const produccionRoutes = require ('../src/routes/produccion/produccion')
+const instrumentoRoutes = require('../src/routes/instrumento/instrumento')
 
 
 const app = express();
@@ -40,6 +41,8 @@ app.use('/api/material', materialRoutes);
 app.use('/api/mantenimiento',mantenimientoRoutes)
 
 app.use('/api/produccion',produccionRoutes)
+
+app.use('/api/instrumento',instrumentoRoutes)
 
 // ========== ENDPOINT DE SALUD ==========
 app.get('/api/health', async (req, res) => {
